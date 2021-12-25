@@ -6,7 +6,7 @@ This projected started as a resource guide with the goal of connecting students 
 Student feedback about the on-line resources indicated a need for better "more interesting" examples. That feedback drove this project.
 The code for this project was written to demonstrate various aspects of C++ and OOP, not necassarily to demonstrate best programming practices. In some cases, I know I swayed from best practices in order to demonstrate as many C++ and OOP techniques as possible.
 I note these decisions in the comments.
-The ZC references 
+When selecting resources to reference, 
 
 
 # Introduction
