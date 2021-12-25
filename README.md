@@ -41,3 +41,6 @@ Think of the SimpleGame class as a framework with defined interfaces for charact
 10. Get next character
 
 11. Goto 2
+
+
+![](block_diagram.png)
