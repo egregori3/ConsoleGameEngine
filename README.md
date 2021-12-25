@@ -1,3 +1,16 @@
+# Purpose
+
+The internet provides a wealth of valuable resources for a student learning object-oriented programming. 
+This projected started as a resource guide with the goal of connecting students to on-line resources: https://github.com/egregori3/C-Plus-Plus_Article
+
+Student feedback about the on-line resources indicated a need for better "more interesting" examples. That feedback drove this project.
+The code for this project was written to demonstrate various aspects of C++ and OOP, not necassarily to demonstrate best programming practices. In some cases, I know I swayed from best practices in order to demonstrate as many C++ and OOP techniques as possible.
+I note these decisions in the comments.
+The ZC references 
+
+
+# Introduction
+
 A simple game consists of an ascii graphics based world and characters. There are two types of characters: user controlled and “AI” controlled. The world both constrains the characters and is altered by them. 
 
 * Simple game “has a” characters (composition)
