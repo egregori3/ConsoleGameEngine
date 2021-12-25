@@ -20,24 +20,24 @@ Think of the SimpleGame class as a framework with defined interfaces for charact
 
 # SimpleGame.loop()
 
-1.Reset background with world.background
+1. Reset background with world.background
 
-2.Call world.get_constraints(character.x, character.y)
+2. Call world.get_constraints(character.x, character.y)
 
-3.Copy world.constraints to character.constraints
+3. Copy world.constraints to character.constraints
 
-4.get_user_input()
+4. get_user_input()
 
-5.If user_input is exit; exit
+5. If user_input is exit; exit
 
-6.Call character.update(user_input) - this needs to update x,y and c (the algorithm should use constraints)
+6. Call character.update(user_input) - this needs to update x,y and c (the algorithm should use constraints)
 
-7.Call set_background(character.x, character.y, character.c)
+7. Call set_background(character.x, character.y, character.c)
 
-8.If set_background() returned true; Call set_xy(character.x, character.y, character.c)
+8. If set_background() returned true; Call set_xy(character.x, character.y, character.c)
 
-9.Call update()
+9. Call update()
 
-10.Get next character
+10. Get next character
 
-11.Goto 2
+11. Goto 2
