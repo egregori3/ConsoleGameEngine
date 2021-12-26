@@ -38,6 +38,21 @@
  *  Inheritance:   code reuse (ZC8.1)                                         *
  *  Interface:     the use of inheritance to separate users from              *
  *                 implementations (ZC8.6)                                    *
+ *  Virtual Functions:                                                        *
+ *  @see https://isocpp.org/wiki/faq/virtual-functions   (ZC8.4)              *
+ *  A virtual function allows derived classes to replace the implementation   *
+ *  provided by the base class. A pure virtual function is a function that    *
+ *  must be overridden in a derived class and need not be defined.            *
+ *                                                                            *
+ *  SimpleGame game loop                                                      *
+ *  Init:                                                                     *
+ *      call world.init_world() with background string and size               *
+ *  Loop:                                                                     *
+ *      for each character:                                                   *
+ *          call char_state  = character.get_state()                          *
+ *          call world_state = world.get_state(char_state)                    *
+ *          call new_char_state = character.update_state(ui, world_state)     *
+ *          call world.update_state(new_char_state)                           *
  *                                                                            *
  *                                                                            *
  * @section HISTORY                                                           *
@@ -48,10 +63,15 @@
  *  @see https://www.modernescpp.com                                          *
  *  @see https://isocpp.org/wiki/faq/abcs                                     *
  *  @see https://www.learncpp.com/                                            *
+ *  @see https://www.guru99.com/                                              *
+ *  @see https://www.fluentcpp.com/                                           *
+ *  @see https://en.cppreference.com/                                         *
  ******************************************************************************/
 
 /**
- *
+ * https://en.cppreference.com/w/cpp/language/enum
+ * An enumeration is a distinct type whose value is restricted to a range of values, 
+ * which may include several explicitly named constants ("enumerators").
  */
 typedef enum
 {
@@ -62,99 +82,74 @@ typedef enum
 }   ui_t;
 
 /**
- * C++ supports classes and structs (ZC12.11)
- * Some guidance on when to use a struct versus a class:
+ * https://www.guru99.com/cpp-structures.html
  * https://www.fluentcpp.com/2017/06/13/the-real-difference-between-struct-class/
- * An invariant is a relation between the data members of a class that must 
- * hold true for the methods to work correctly. In other words, access to the
- * variables must be grouped. The constraints are invariant. 
+ *
+ * A struct is a bundle. A struct is several related elements that needed to be 
+ * tied up together in a certain context. Such a context can be passing a restricted 
+ * number of arguments to a function.
+ * Here are some reasons using structure in C++.
+ * Use a struct when you need to store elements of different data types under 
+ * one data type.
+ * C++ structs are a value type rather than being a reference type. Use a struct 
+ * if you don’t intend to modify your data after creation.
  */
 
-// Bind the data together using a structure (ZC12.11)
-typedef struct
-{
-    char upper_left;
-    char upper_middle;
-    char upper_right;
-    char middle_left;
-    char character;
-    char lower_left;
-    char lower_middle;
-    char lower_right;
-} contraints_t;
-
+/**
+ * State is defined as the (X,Y) location of a character, the ascii value for
+ * the character, and the ascii values surrounding the character (constraints).
+ * Bind the data together using a structure (ZC12.11)
+ */
 typedef struct
 {
     int  x;
     int  y;
     char c;
-} char_position_t;
+} char_state_t;
 
-/**
- * Use a class to force the constraints to change all at once. (ZC7.1)
- * If multithreading is used in the future, mutex's could be added
- * to the class.
- * Initializer lists (ZC7.6) are discussed here:
- * https://www.learncpp.com/cpp-tutorial/constructor-member-initializer-lists/
- */
-class constraint_transport
+typedef struct
 {
-    private:
-        constraints_t constraints;
-
-    public: // initializer list
-        constraint_transport(constraints_t init_data) : constraints(init_data) {}
-        constraints_t get_constraints(void) {return constraints;}
-}
+    int  x;
+    int  y;
+    char upper_left_constraint;
+    char upper_middle_constraint;
+    char upper_right_constraint;
+    char middle_left_constraint;
+    char character;
+    char lower_left_constraint;
+    char lower_middle_constraint;
+    char lower_right_constraint;
+} world_state_t;
 
 /**
  * @class character
  *
  * @brief
+ *  Called by SimpleGame class
  *  character interface (Abstract Base Class)  (ABC)                          
  *  The user needs to inherit from this class and implement the virtual       
  *  functions with the character's behaviors. The resulting object            
  *  instantiated from the class is registered with the SimpleGame class.      
  *
  * @section DESCRIPTION
- *  @see https://isocpp.org/wiki/faq/virtual-functions   (ZC8.4)
- *
- *  A virtual function allows derived classes to replace the implementation 
- *  provided by the base class. A pure virtual function is a function that 
- *  must be overridden in a derived class and need not be defined.
+ *  get_state() needs to return the characters current state
+ *  update_state() needs to update the characters state based on the world state
+ *   and (if a user controlled character) user_input or (if an AI controlled character)
+ *   the user provided AI algorithm input then return the new_state
  *
  * @section USAGE
- *  The class variables are used for communicating with the SimpleGame class.
- *  This only works because the app is single threaded.
- *  1) The SimpleGame class calls set_constraint() to set the constraints.
- *  2) The SimpleGame class calls update()
- *  3) The user's update() implementation calls get_constraint() to deterimine
- *     how it can move.
- *  4) The user's update() implementation calls set_character()
- *  5) After update() returns, SimpleGame calls get_character()
- *  6) SimpleGame updates the graphics
- *
- *  To create a character for your game:
- *  1) Create a derived class that inherites from this ABC.
- *  2) Implement the update() method to do the following:
- *     A) User controlled character
- *        1. call get_constraints() for each constraint
+ *  To create a character for your game, Create a derived class that inherites from this ABC.
+ *  Your derived class must keep track of the characters state (x,y,c) and
+ *  based on the world_state, plus either the user interface or an AI decision, update
+ *  the state of the character.
  */
 class character
 {
-    private: // these variables are accessed via getters/setters (ZC7.5)
-        char c;                           // character symbol
-        int  x,y;                         // character position
-        constraint_id_t cid[CONSTRAINTS]; // constraints
-
-    protected: // Only the users class can access these (ZC7.5)
-        char get_constraint(constraint_id_t cid); // user can read
-        void set_character(int x, int y, char c); // user can write
-
-    public: // Called by SimpleGame class
-        void set_constraint(constraint_id_t cid, char c); // SG can write
-        char get_character(int &x, int &y);               // SG can read
-        virtual void update(ui_t user_input) = 0; // pure virtual function (ZC8.4)
+    public: // 
+        // pure virtual function (ZC8.4)
+        virtual char_state_t get_state(void);
+        virtual char_state_t update_state( const ui_t user_input, 
+                                           const world_state_t world_state) = 0;
 };
 
 
@@ -162,23 +157,22 @@ class character
  * @class world
  *
  * @brief
+ *  Called by SimpleGame class
  *  world interface (Abstract Base Class)  (ABC)
  *  The user needs to inherit from this class and implement the virtual
- *  functions with the world's behaviors. The resulting class will be
- *  used by SimpleGame to instantiated the world object.
+ *  functions with the world's behaviors. 
  *
  * @section DESCRIPTION
- *  @see https://isocpp.org/wiki/faq/virtual-functions   (ZC8.4)
- *
- *  A virtual function allows derived classes to replace the implementation 
- *  provided by the base class. A pure virtual function is a function that 
- *  must be overridden in a derived class and need not be defined.
  *
  * @section USAGE
  */
 class world
 {
     public:
-        virtual contraints_t get_constraints(int x, int y) = 0; // pure virtual function (ZC8.4)
-        virtual void update_background(int x, int y, char c) = 0;
+        // pure virtual function (ZC8.4)
+        virtual int init( const std::string background, 
+                          const int rows, const int cols) = 0;
+        virtual const world_state_t get_state(const char_state_t char_state) = 0; 
+        virtual void update_state(const char_state_t char_state) = 0;
 };
+
