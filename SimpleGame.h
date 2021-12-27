@@ -1,7 +1,10 @@
 #include <string>
+#include <vector>
+#include "interfaces.h"
+
 
 /******************************************************************************
- * @file   interfaces.h                                                       *
+ * @file   SimpleGame.h                                                       *
  * @author Eric Gregori -  https://github.com/egregori3                       *
  * @data   12/21                                                              *
  *                                                                            *
@@ -68,130 +71,15 @@
  *  @see https://en.cppreference.com/                                         *
  *  @see https://www.cs.fsu.edu/                                              *
  *  @see https://www.tutorialspoint.com/                                      *
+ *  @see https://www.drdobbs.com/                                             *
+ *  @see https://www.cplusplus.com/                                           *
  ******************************************************************************/
 
-/**
- * https://en.cppreference.com/w/cpp/language/enum
- * An enumeration is a distinct type whose value is restricted to a range of values, 
- * which may include several explicitly named constants ("enumerators").
- */
-typedef enum
-{
-    UI_UP,
-    UI_DOWN,
-    UI_LEFT,
-    UI_RIGHT
-}   ui_t;
 
-/**
- * https://www.guru99.com/cpp-structures.html
- * https://www.fluentcpp.com/2017/06/13/the-real-difference-between-struct-class/
- *
- * A struct is a bundle. A struct is several related elements that needed to be 
- * tied up together in a certain context. Such a context can be passing a restricted 
- * number of arguments to a function.
- * Here are some reasons using structure in C++.
- * Use a struct when you need to store elements of different data types under 
- * one data type.
- * C++ structs are a value type rather than being a reference type. Use a struct 
- * if you don’t intend to modify your data after creation.
- */
-
-/**
- * State is defined as the (X,Y) location of a character, the ascii value for
- * the character, and the ascii values surrounding the character (constraints).
- * Bind the data together using a structure (ZC12.11)
- */
-typedef struct
-{
-    int  id;
-    int  x;
-    int  y;
-    char c;
-} char_state_t;
-
-typedef struct
-{
-    int  x;
-    int  y;
-    char upper_left_constraint;
-    char upper_middle_constraint;
-    char upper_right_constraint;
-    char middle_left_constraint;
-    char character;
-    char lower_left_constraint;
-    char lower_middle_constraint;
-    char lower_right_constraint;
-} world_state_t;
-
-/**
- * @class character
- *
- * @brief
- *  Called by SimpleGame class
- *  character interface (Abstract Base Class)  (ABC)                          
- *  The user needs to inherit from this class and implement the virtual       
- *  functions with the character's behaviors. The resulting object            
- *  instantiated from the class is registered with the SimpleGame class.      
- *
- * @section DESCRIPTION
- *  get_state()    needs to return the characters current state
- *  update_state() needs to update the characters state based on the world state
- *                 and (if a user controlled character) user_input or 
- *                 (if an AI controlled character) the user provided AI algorithm 
- *                 input then return the new_state
- *
- * @section USAGE
- *  To create a character for your game, create a derived class that inherites from this ABC.
- *  Your derived class must keep track of the characters state (x,y,c) and
- *  based on the world_state, plus either the user interface or an AI decision, update
- *  the state of the character.
- */
-class character
-{
-    public: // 
-        // pure virtual function (ZC8.4)
-        virtual char_state_t get_state(void);
-        virtual char_state_t update_state( const ui_t user_input, 
-                                           const world_state_t world_state) = 0;
-};
-
-
-/**
- * @class world
- *
- * @brief
- *  Called by SimpleGame class
- *  world interface (Abstract Base Class)  (ABC)
- *  The user needs to inherit from this class and implement the virtual
- *  functions with the world's behaviors. 
- *
- *  pass-by-reference: (ZC4.8)
- *  https://www.cs.fsu.edu/~myers/c++/notes/references.html
- *  https://www.tutorialspoint.com/cplusplus/cpp_function_call_by_reference.htm
- *  The call by reference method of passing arguments to a function copies the 
- *  reference of an argument into the formal parameter. Inside the function, 
- *  the reference is used to access the actual argument used in the call. 
- *  This means that changes made to the parameter affect the passed argument.
- *
- * @section DESCRIPTION
- *  init()         needs to return a string representing the background along 
- *                 with the number of rows and columns in the background
- *  get_state()    needs to return the world state based on the character state
- *  update_state() needs to update the world state based on the character state
- *
- * @section USAGE
- *  To create a world for your game, create a derived class that inherites from this ABC.
- *  A world consists of a background and a set of rules that you define by implementing
- *  the interface functions.
- *  
- */
-class world
+class SimpleGame
 {
     public:
-        // pure virtual function (ZC8.4)
-        virtual int init( std::string &background, 
-                          int &rows, int &cols) = 0;
-        virtual const world_state_t get_state(const char_state_t char_state) = 0; 
-        virtual void update_state(const char_state_t char_state) = 0;
+        int 
 };
+
+
