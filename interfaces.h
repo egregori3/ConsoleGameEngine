@@ -1,3 +1,6 @@
+#ifndef INTERFACES_H
+#define INTERFACES_H
+
 #include <string>
 
 /******************************************************************************
@@ -104,10 +107,11 @@ typedef enum
  */
 typedef struct
 {
-    int  id;
-    int  x;
-    int  y;
-    char c;
+    int  id;        // id of character - the user can use for whatever they want
+    int  x;         // X position of character
+    int  y;         // Y position of character
+    char c;         // character to display
+    bool display;   // set to true to display the character
 } char_state_t;
 
 typedef struct
@@ -153,7 +157,7 @@ class character
         // pure virtual function (ZC8.4)
         virtual char_state_t get_state(void);
         virtual char_state_t update_state( const ui_t user_input, 
-                                           const world_state_t world_state) = 0;
+                                           const world_state_t *world_state) = 0;
 };
 
 
@@ -190,8 +194,10 @@ class world
 {
     public:
         // pure virtual function (ZC8.4)
-        virtual int init( std::string &background, 
-                          int &rows, int &cols) = 0;
+        virtual int get_world( const std::string &background, 
+                               int &rows, int &cols) = 0;
         virtual const world_state_t get_state(const char_state_t char_state) = 0; 
         virtual void update_state(const char_state_t char_state) = 0;
 };
+
+#endif

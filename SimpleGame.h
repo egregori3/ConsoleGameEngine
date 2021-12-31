@@ -1,5 +1,10 @@
+#ifndef SIMPLE_GAME_H
+#define SIMPLE_GAME_H
+
 #include <string>
 #include <vector>
+#include <iostream>
+#include <memory>
 #include "interfaces.h"
 
 
@@ -41,11 +46,30 @@
  *  Inheritance:   code reuse (ZC8.1)                                         *
  *  Interface:     the use of inheritance to separate users from              *
  *                 implementations (ZC8.6)                                    *
+ *                                                                            *
  *  Virtual Functions:                                                        *
  *  @see https://isocpp.org/wiki/faq/virtual-functions   (ZC8.4)              *
  *  A virtual function allows derived classes to replace the implementation   *
  *  provided by the base class. A pure virtual function is a function that    *
  *  must be overridden in a derived class and need not be defined.            *
+ *                                                                            *
+ *  Smart Pointers:                                                           *
+ *  https://en.cppreference.com/w/cpp/memory/shared_ptr                       *
+ *  Pointers: with great power comes great responsibility.                    *
+ *  Although powerful, pointers have been the cause of many bugs.             *
+ *  In response, C++11 introduced smart pointers.                             *
+ *  std::shared_ptr is a smart pointer that retains shared ownership of an    *
+ *  object through a pointer. Several shared_ptr objects may own the same     *
+ *  object. A shared_ptr can share ownership of an object while storing a     *
+ *  pointer to another object.                                                *
+ *                                                                            *
+ *  Vectors:                                                                  *
+ *  https://linuxhint.com/use_cpp_vector/                                     *
+ *  www.dreamincode.net/forums/topic/63358-store-class-objects-in-vector/     *
+ *  An array is a series of same object types in consecutive memory locations.*
+ *  An array cannot increase ore reduce in length. A vector is like an array, *
+ *  but its length can be increased or reduced. A vector, therefore,          *
+ *  has many more operations than an array.                                   *
  *                                                                            *
  *  SimpleGame game loop                                                      *
  *   Init:                                                                    *
@@ -73,13 +97,30 @@
  *  @see https://www.tutorialspoint.com/                                      *
  *  @see https://www.drdobbs.com/                                             *
  *  @see https://www.cplusplus.com/                                           *
+ *  @see https://www.dreamincode.net/                                         *
+ *  @see https://linuxhint.com/                                               *
  ******************************************************************************/
-
 
 class SimpleGame
 {
+    private:
+        // https://www.drdobbs.com/collecting-shared-objects/184401839
+        std::vector< std::shared_ptr<character> > characters;
+        std::unique_ptr<world> p_user_world;
+        std::string background;
+
+    private:
+        ui_t get_user_input(void);
+        int  init_background(std::string bg);
+        int  update_display(int x, int y, char c);
+        int game_loop(void);
+
     public:
-        int 
+        SimpleGame( std::unique_ptr<world> p_world, std::string background, 
+                    int loop_rate);
+        int add_character(std::unique_ptr<character> user_char);
+        int start_game(void);
 };
 
+#endif
 
