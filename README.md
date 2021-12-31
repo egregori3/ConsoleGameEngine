@@ -6,6 +6,30 @@ Student feedback about the on-line resources indicated a need for better "more i
                                                                            
 The comments in the code reference Zybook chapters using the following notation: ZC7.1 referres to Zybooks chapter 7, section 1                  
 
+https://gcc.gnu.org/projects/cxx-status.html
+
+https://en.cppreference.com/w/cpp/11
+
+https://en.cppreference.com/w/cpp/14
+
+There are 2 "identical" projects: one written using basic C++ (C++98) and the other written using advanced C++ (C++11, C++14).
+
+## IntroCPP demonstrates
+
+ * class/struct
+ * Encapsulation
+ * Abstraction
+ * Polymorphism (virtual functions)
+ * Inheritance (base class / derived class)
+ * Interface (abstract class)
+ * Virtual Functions
+ * vectors
+
+## AdvCPP (everything in Intro plus)
+
+ * smart pointers
+ * List-initialization
+ * 
 
 # Resources
 
@@ -21,7 +45,8 @@ The comments in the code reference Zybook chapters using the following notation:
  * https://www.drdobbs.com/                                             
  * https://www.cplusplus.com/                                           
  * https://www.dreamincode.net/                                         
- * https://linuxhint.com/     
+ * https://linuxhint.com/   
+ * https://gcc.gnu.org/  
 
 
 
