@@ -24,12 +24,13 @@ There are 2 "identical" projects: one written using basic C++ (C++98) and the ot
  * Interface (abstract class)
  * Virtual Functions
  * vectors
+ * pointers
+ * pass by reference
 
 ## AdvCPP (everything in Intro plus)
 
  * smart pointers
  * List-initialization
- * 
 
 # Resources
 
