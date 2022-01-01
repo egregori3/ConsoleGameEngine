@@ -6,6 +6,38 @@ Student feedback about the on-line resources indicated a need for better "more i
                                                                            
 The comments in the code reference Zybook chapters using the following notation: ZC7.1 referres to Zybooks chapter 7, section 1                  
 
+https://gcc.gnu.org/projects/cxx-status.html
+
+https://en.cppreference.com/w/cpp/11
+
+https://en.cppreference.com/w/cpp/14
+
+There are 2 "identical" projects: one written using basic C++ (C++98) and the other written using advanced C++ (C++11, C++14).
+
+## IntroCPP demonstrates
+
+ * const (ZC2.9)
+ * strings (ZC2.15)
+ * class/struct (ZC7.2 to 7.3) 
+ * new/delete (ZC10.3)
+ * constructors (ZC7.6)
+ * access specifiers (ZC7.5)
+ * Encapsulation (ZC7.1)
+ * Abstraction (ZC7.1)
+ * Polymorphism (virtual functions) (ZC8.4)
+ * Inheritance (base class / derived class) (ZC8.1)
+ * Interface (abstract class) (ZC8.6)
+ * Virtual Functions (ZC8.4)
+ * vectors (ZC6.2)
+ * pointers (ZC10.2)
+ * pass by reference (ZC4.8)
+
+## AdvCPP (everything in Intro plus)
+
+ * smart pointers
+ * List-initialization
+
+The advanced CPP project does the same thing as the intro project but is written to take advantage of some C++11/14 features. 
 
 # Resources
 
@@ -21,8 +53,58 @@ The comments in the code reference Zybook chapters using the following notation:
  * https://www.drdobbs.com/                                             
  * https://www.cplusplus.com/                                           
  * https://www.dreamincode.net/                                         
- * https://linuxhint.com/     
+ * https://linuxhint.com/   
+ * https://gcc.gnu.org/  
+ * https://www.educative.io/
+ * http://pages.cs.wisc.edu/~hasti/cs368/CppTutorial
 
+# Program Flow
+
+```
+ *  SimpleGame game loop                                                      *
+ *   Init:                                                                    *
+ *      call world.init_world() with background string and size               *
+ *   Loop:                                                                    *
+ *      for each character:                                                   *
+ *          call char_state  = character.get_state()                          *
+ *          call world_state = world.get_state(char_state)                    *
+ *          call new_char_state = character.update_state(ui, world_state)     *
+ *          call world.update_state(new_char_state)                           *
+ 
+
+egregori:~/Development/ConsoleGameEngine $ ./a.out
+eater_world: constructor
+SimpleGame: constructor
+eater_world: get_world
+SimpleGame: init_background
+monster: constructor
+SimpleGame: add_character
+
+SimpleGame: start_game
+SimpleGame: game_loop
+SimpleGame: in_loop
+SimpleGame: run_char
+monster: get_state          - call char_state  = character.get_state()
+eater_world: get_state      - call world_state = world.get_state(char_state)
+SimpleGame: get_user_input
+monster: update_state       - call new_char_state = character.update_state(ui, world_state)
+eater_world: update_state   - call world.update_state(new_char_state)
+
+SimpleGame: in_loop
+SimpleGame: run_char
+monster: get_state
+eater_world: get_state
+SimpleGame: get_user_input
+monster: update_state
+eater_world: update_state
+SimpleGame: in_loop
+SimpleGame: run_char
+monster: get_state
+eater_world: get_state
+SimpleGame: get_user_input
+monster: update_state
+eater_world: update_state
+```
 
 
 
