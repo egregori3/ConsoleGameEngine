@@ -57,6 +57,7 @@ The advanced CPP project does the same thing as the intro project but is written
  * https://gcc.gnu.org/  
  * https://www.educative.io/
  * http://pages.cs.wisc.edu/~hasti/cs368/CppTutorial
+ * https://www.codesdope.com/
 
 # Program Flow
 
