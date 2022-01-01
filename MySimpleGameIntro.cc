@@ -42,6 +42,8 @@
  *          call new_char_state = character.update_state(ui, world_state)     *
  *          call world.update_state(new_char_state)                           *
  *                                                                            *
+ * @section BUILD                                                             *
+ *  g++ MySimpleGameIntro.cc MySimpleGame.cc ./IntroCPP/SimpleGame.cc -I./IntroCPP -I./
  *                                                                            *
  * @section HISTORY                                                           *
  *  12/21 Eric Gegori - File created                                          *
@@ -51,19 +53,58 @@
  ******************************************************************************/
 
 extern std::string arena;
-const int loop_rate_500ms = 500;
 
+// Game hyper-parameters
+const int  loop_rate_500ms = 500;
+const int  ghosts = 5;
+const char ghost = 'H'; // Initial "graphic" - can be overrriden by your derived class
+const char eater = '>';
 
 int main()
 {
+    // https://www.codesdope.com/cpp-array/
+    // https://www.learncpp.com/cpp-tutorial/null-pointers/
+    // https://en.cppreference.com/w/c/language/array_initialization
+    // https://en.cppreference.com/w/cpp/language/aggregate_initialization
+    // https://isocpp.org/wiki/faq/freestore-mgmt#null-or-zero
+    //
+    // This is dangerous!!!!
+    // int array[5] = {0}; will fill the array with 0.
+    // int array[5] = {3}; will ONLY set a[0] to 3, all others will be 0
+    // GCC provides a workaround for this, but it is compiler specific.
+    // monster *p_monsters[6] = { NULL }; // will work, but could burn you
+    monster *p_monsters[ghosts+1] = { NULL, NULL, NULL, NULL, NULL, NULL }; // safer
+
     eater_world *p_world = new eater_world();
     SimpleGame sg(p_world, loop_rate_500ms);
 
-    char_state_t monster1 = {0,0,0,'<',true};
-    monster *p_monster1 = new monster(monster1);
-    sg.add_character(p_monster1);
+    // char_state_t monster1 = {0,0,0,'<',true};     // init char_state_t structure
+    // monster *p_monster1 = new monster(monster1);  // create a new monster object in memory
+    // sg.add_character(p_monster1);
+    // I combined the above lines into a single line
+    //                \/ Create a new monster object in memory
+    //                             \/ Pass the monster custructor a char_state_t structure
+    //                                       \/ C trick for structure init
+    p_monsters[0] = new monster((char_state_t){99,19,15,eater,true});
+    p_monsters[1] = new monster((char_state_t){1,19,11,ghost,true});
+    p_monsters[2] = new monster((char_state_t){2,19,11,ghost,true});
+    p_monsters[3] = new monster((char_state_t){3,19,11,ghost,true});
+    p_monsters[4] = new monster((char_state_t){4,19,11,ghost,true});
+    p_monsters[5] = new monster((char_state_t){5,19,11,ghost,true});
+
+    for(int ii=0; ii<(ghosts+1); ii++)
+    {
+        sg.add_character(p_monsters[ii]);
+    }
 
     sg.start_game();
 
-    delete[] p_monster1;
+    // https://www.cpp-junkie.com/2020/04/c-delete-vs-delete.html
+    // If you allocate memory using new keyword make sure to deallocate memory 
+    // using delete keyword to avoid memory leaks. If you allocate an array of 
+    // memory using new[] deallocate memory using delete[] keyword.
+    for(int ii=0; ii<(ghosts+1); ii++)
+    {
+        delete p_monsters[ii];
+    }
 }

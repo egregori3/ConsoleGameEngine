@@ -51,10 +51,8 @@
  ******************************************************************************/
 
 
-const int loop_rate_500ms = 500;
-
 const std::string arena =
-  // 0                                      3
+  // 0         1         2         3        4
   // 0123456789012345678901234567890123456789
     "|======================================|" // 00
     "|                  |                   |" // 01
@@ -90,7 +88,7 @@ int eater_world::get_world(std::string &background, int &rows, int &cols)
    std::cout << "eater_world: get_world" << std::endl;
    background = arena;
    rows       = 21;
-   cols       = 40;
+   cols       = 50;
 
    return 0;
 }
