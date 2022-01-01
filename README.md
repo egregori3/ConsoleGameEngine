@@ -16,22 +16,28 @@ There are 2 "identical" projects: one written using basic C++ (C++98) and the ot
 
 ## IntroCPP demonstrates
 
- * class/struct
- * access specifiers
- * Encapsulation
- * Abstraction
- * Polymorphism (virtual functions)
- * Inheritance (base class / derived class)
- * Interface (abstract class)
- * Virtual Functions
- * vectors
- * pointers
- * pass by reference
+ * const (ZC2.9)
+ * strings (ZC2.15)
+ * class/struct (ZC7.2 to 7.3) 
+ * new/delete (ZC10.3)
+ * constructors (ZC7.6)
+ * access specifiers (ZC7.5)
+ * Encapsulation (ZC7.1)
+ * Abstraction (ZC7.1)
+ * Polymorphism (virtual functions) (ZC8.4)
+ * Inheritance (base class / derived class) (ZC8.1)
+ * Interface (abstract class) (ZC8.6)
+ * Virtual Functions (ZC8.4)
+ * vectors (ZC6.2)
+ * pointers (ZC10.2)
+ * pass by reference (ZC4.8)
 
 ## AdvCPP (everything in Intro plus)
 
  * smart pointers
  * List-initialization
+
+The advanced CPP project does the same thing as the intro project but is written to take advantage of some C++11/14 features. 
 
 # Resources
 
