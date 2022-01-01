@@ -198,6 +198,7 @@ int main()
 # How to make your own game
 
 MySimpleGame.h
+
 MySimpleGame.cc - Create your world and characters by deriving from the world and character abstract classes (inheritance)
   
 MySimpleGameIntro.cc - Instantiate the SimplGame class and initialize it with your world and characters objects.
