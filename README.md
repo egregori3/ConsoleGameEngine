@@ -58,6 +58,53 @@ The advanced CPP project does the same thing as the intro project but is written
  * https://www.educative.io/
  * http://pages.cs.wisc.edu/~hasti/cs368/CppTutorial
 
+# Program Flow
+
+```
+ *  SimpleGame game loop                                                      *
+ *   Init:                                                                    *
+ *      call world.init_world() with background string and size               *
+ *   Loop:                                                                    *
+ *      for each character:                                                   *
+ *          call char_state  = character.get_state()                          *
+ *          call world_state = world.get_state(char_state)                    *
+ *          call new_char_state = character.update_state(ui, world_state)     *
+ *          call world.update_state(new_char_state)                           *
+ 
+
+egregori:~/Development/ConsoleGameEngine $ ./a.out
+eater_world: constructor
+SimpleGame: constructor
+eater_world: get_world
+SimpleGame: init_background
+monster: constructor
+SimpleGame: add_character
+
+SimpleGame: start_game
+SimpleGame: game_loop
+SimpleGame: in_loop
+SimpleGame: run_char
+monster: get_state          - call char_state  = character.get_state()
+eater_world: get_state      - call world_state = world.get_state(char_state)
+SimpleGame: get_user_input
+monster: update_state       - call new_char_state = character.update_state(ui, world_state)
+eater_world: update_state   - call world.update_state(new_char_state)
+
+SimpleGame: in_loop
+SimpleGame: run_char
+monster: get_state
+eater_world: get_state
+SimpleGame: get_user_input
+monster: update_state
+eater_world: update_state
+SimpleGame: in_loop
+SimpleGame: run_char
+monster: get_state
+eater_world: get_state
+SimpleGame: get_user_input
+monster: update_state
+eater_world: update_state
+```
 
 
 
