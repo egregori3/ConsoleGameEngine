@@ -169,13 +169,13 @@ int main()
     //                \/ Create a new monster object in memory
     //                             \/ Pass the monster custructor a char_state_t structure
     //                                       \/ C trick for structure init
-    p_monsters[0] = new monster((char_state_t){99,19,15,eater,true});
-    p_monsters[1] = new monster((char_state_t){1,19,11,ghost,true});
-    p_monsters[2] = new monster((char_state_t){2,19,11,ghost,true});
-    p_monsters[3] = new monster((char_state_t){3,19,11,ghost,true});
-    p_monsters[4] = new monster((char_state_t){4,19,11,ghost,true});
-    p_monsters[5] = new monster((char_state_t){5,19,11,ghost,true});
-
+    p_monsters[0] = new monster((char_state_t){EATER_ID,19,15,eater,true});
+    p_monsters[1] = new monster((char_state_t){GHOST_TYPE2_ID,19,11,ghost,true});
+    p_monsters[2] = new monster((char_state_t){GHOST_TYPE1_ID,19,11,ghost,true});
+    p_monsters[3] = new monster((char_state_t){GHOST_TYPE1_ID,19,11,ghost,true});
+    p_monsters[4] = new monster((char_state_t){GHOST_TYPE2_ID,19,11,ghost,true});
+    p_monsters[5] = new monster((char_state_t){GHOST_TYPE1_ID,19,11,ghost,true});
+    
     for(int ii=0; ii<(ghosts+1); ii++)
     {
         sg.add_character(p_monsters[ii]);
