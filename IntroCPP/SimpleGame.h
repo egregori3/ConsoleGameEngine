@@ -104,10 +104,11 @@
 class SimpleGame
 {
     private:
-        // https://www.drdobbs.com/collecting-shared-objects/184401839
-        std::vector< std::shared_ptr<character> > characters;
-        std::unique_ptr<world> p_user_world;
+        // https://www.dreamincode.net/forums/topic/63358-store-class-objects-in-vector/
+        std::vector<character *> characters;
+        world *p_user_world;
         std::string background;
+        int loop_rate_in_ms;
 
     private:
         ui_t get_user_input(void);
@@ -116,9 +117,8 @@ class SimpleGame
         int game_loop(void);
 
     public:
-        SimpleGame( std::unique_ptr<world> p_world, std::string background, 
-                    int loop_rate);
-        int add_character(std::unique_ptr<character> user_char);
+        SimpleGame( world *p_world, int loop_rate);
+        int add_character(character *p_user_char);
         int start_game(void);
 };
 

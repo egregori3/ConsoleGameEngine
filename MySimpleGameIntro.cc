@@ -4,6 +4,7 @@
 #include <memory>
 #include "interfaces.h"
 #include "SimpleGame.h"
+#include "MySimpleGame.h"
 
 
 /******************************************************************************
@@ -49,106 +50,20 @@
  *  @see https://www.cs.bu.edu/                                               *
  ******************************************************************************/
 
-
+extern std::string arena;
 const int loop_rate_500ms = 500;
-
-static const std::string arena =
-  // 0                                      3
-  // 0123456789012345678901234567890123456789
-    "|======================================|" // 00
-    "|                  |                   |" // 01
-    "| |======| |=====| | |=====| |=======| |" // 02
-    "|                                      |" // 03
-    "| |======| |=| |=======| |=| |=======| |" // 04
-    "|          |=|    |=|    |=|           |" // 05
-    "|========| |====| |=| |====| |=========|" // 06
-    "         | |=|           |=| |          " // 07
-    "|========| |=| |=======| |=| |=========|" // 08
-    "               |       |                " // 09
-    "|========| |=| |=======| |=| |=========|" // 10
-    "         | |=|           |=| |          " // 11
-    "|========| |=| |=======| |=| |=========|" // 12
-    "|                 |=|                  |" // 13
-    "| |======| |====| |=| |====| |=======| |" // 14
-    "|      |=|                   |=|       |" // 15
-    "|====| |=| |=| |=======| |=| |=| |=====|" // 16
-    "|          |=|    |=|    |=|           |" // 17
-    "| |=============| |=| |==============| |" // 18
-    "|                                      |" // 19
-    "|======================================|";// 20
-
-
-// https://www.cs.bu.edu/fac/gkollios/cs113/Slides/lect13.pdf
-class eater_world : public world
-{
-    private:
-        world_state_t ws;
-
-    public:
-        eater_world()
-        {
-        }
-
-        int get_world(const std::string &background, int &rows, int &cols)
-        {
-           background = arena;
-           rows       = 21;
-           cols       = 40;
-        }
-
-        const world_state_t get_state(const char_state_t char_state)
-        {
-                ws.x = char_state.x;
-                ws.y = char_state.y;
-                ws.upper_left_constraint    = 0;
-                ws.upper_middle_constraint  = 0;
-                ws.upper_right_constraint   = 0;
-                ws.middle_left_constraint   = 0;
-                ws.character                = char_state.c;
-                ws.lower_left_constraint    = 0;
-                ws.lower_middle_constraint  = 0;
-                ws.lower_right_constraint   = 0;
-
-            return ws;
-        }
-
-        void update_state(const char_state_t char_state)
-        {
-                ws.x = char_state.x,
-                ws.y = char_state.y,
-                ws.character                = char_state.c,
-        }
-};
-
-class monster1 : public character
-{
-    private:
-        char_state_t my_state = {0,0,0,'<',true};
-
-    public:
-        char_state_t get_state(void)
-        {
-            return my_state;
-        }
-
-        char_state_t update_state( const ui_t user_input, 
-                                   const world_state_t *world_state)
-        {
-            if((user_input == UI_UP) && (world_state->upper_middle_constraint == ' '))
-                return my_state;
-        }
-
-};
 
 
 int main()
 {
-    // https://www.learncpp.com/cpp-tutorial/stdunique_ptr/
-    std::unique_ptr<eater_world> my_word{new eater_world{}};
-    SimpleGame sg(eater_world, arena, loop_rate_500ms);
+    eater_world *p_world = new eater_world();
+    SimpleGame sg(p_world, loop_rate_500ms);
 
-    auto p_monster1{ std::make_unique<monster1>() };
-    sg.add_character(std::move(p_monster1));
+    char_state_t monster1 = {0,0,0,'<',true};
+    monster *p_monster1 = new monster(monster1);
+    sg.add_character(p_monster1);
 
     sg.start_game();
+
+    delete[] p_monster1;
 }

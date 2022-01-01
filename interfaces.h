@@ -83,7 +83,8 @@ typedef enum
     UI_UP,
     UI_DOWN,
     UI_LEFT,
-    UI_RIGHT
+    UI_RIGHT,
+    UI_EXIT
 }   ui_t;
 
 /**
@@ -155,9 +156,9 @@ class character
 {
     public: // 
         // pure virtual function (ZC8.4)
-        virtual char_state_t get_state(void);
+        virtual char_state_t get_state(void) = 0;
         virtual char_state_t update_state( const ui_t user_input, 
-                                           const world_state_t *world_state) = 0;
+                                           const world_state_t world_state) = 0;
 };
 
 
@@ -194,7 +195,7 @@ class world
 {
     public:
         // pure virtual function (ZC8.4)
-        virtual int get_world( const std::string &background, 
+        virtual int get_world( std::string &background, 
                                int &rows, int &cols) = 0;
         virtual const world_state_t get_state(const char_state_t char_state) = 0; 
         virtual void update_state(const char_state_t char_state) = 0;
