@@ -1,3 +1,6 @@
+// For a full list of resources see:
+// https://github.com/egregori3/ConsoleGameEngine/blob/master/README.md
+
 #include <string>
 #include <vector>
 #include <iostream>
@@ -17,6 +20,9 @@ int SimpleGame::game_loop(void)
         std::cout << "SimpleGame: in_loop" << std::endl;
 
         // https://limbioliong.wordpress.com/2012/12/25/storing-c-objects-in-a-stl-vector-part-2/
+        // https://www.oreilly.com/library/view/c-cookbook/0596007612/ch06s05.html
+        // https://www.dreamincode.net/forums/topic/63358-store-class-objects-in-vector/
+        // https://linuxhint.com/use_cpp_vector/
         std::vector<character *>::iterator it;
         for (it = characters.begin(); it != characters.end(); ++it)
         {
@@ -62,7 +68,9 @@ int SimpleGame::update_display(int x, int y, char c)
 
 int SimpleGame::add_character(character *p_user_char)
 {
+    // https://www.oreilly.com/library/view/c-cookbook/0596007612/ch06s05.html
     std::cout << "SimpleGame: add_character" << std::endl;
+    characters.push_back(p_user_char);
 
     return 0;
 }

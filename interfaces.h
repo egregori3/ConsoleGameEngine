@@ -62,15 +62,7 @@
  *  12/21 Eric Gegori - File created                                          *
  *                                                                            *
  * @section SOURCES                                                           *
- *  @see http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines          *
- *  @see https://www.modernescpp.com                                          *
- *  @see https://isocpp.org/wiki/faq/abcs                                     *
- *  @see https://www.learncpp.com/                                            *
- *  @see https://www.guru99.com/                                              *
- *  @see https://www.fluentcpp.com/                                           *
- *  @see https://en.cppreference.com/                                         *
- *  @see https://www.cs.fsu.edu/                                              *
- *  @see https://www.tutorialspoint.com/                                      *
+ *  https://github.com/egregori3/ConsoleGameEngine/blob/master/README.md      *
  ******************************************************************************/
 
 /**
