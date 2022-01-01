@@ -17,6 +17,7 @@ There are 2 "identical" projects: one written using basic C++ (C++98) and the ot
 ## IntroCPP demonstrates
 
  * class/struct
+ * access specifiers
  * Encapsulation
  * Abstraction
  * Polymorphism (virtual functions)
