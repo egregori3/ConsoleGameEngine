@@ -65,7 +65,6 @@ The advanced CPP project does the same thing as the intro project but is written
 |Have to modify|Directory|Filename|Description|
 |--------------|---------|--------|-----------|
 ||Graphics||The SimpleGame "engine" is graphics system independent (although it is only designed for 2D)|
-|no|Graphics||Describes the interface between the SimpleGame "engine" and the "graphics" system|
 |no|Graphics/LinuxText|graphics.x|ncurses based ascii graphics|
 |no|AbstractClasses|interfaces.h|These abstract classes define the interfaces for the SimpleGame "engine".|
 ||IntroCPP||The SimpleGame "engine" written using C++98|
