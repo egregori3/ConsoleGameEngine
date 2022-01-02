@@ -60,6 +60,25 @@ The advanced CPP project does the same thing as the intro project but is written
  * https://www.codesdope.com/
  * https://www.cpp-junkie.com/
 
+# Files
+
+|Have to modify|Directory|Filename|Description|
+|--------------|---------|--------|-----------|
+||Graphics||The SimpleGame "engine" is graphics system independent (although it is only designed for 2D)|
+|no|Graphics|graphics.h|Describes the interface between the SimpleGame "engine" and the "graphics" system|
+|no|Graphics/LinuxText|graphics.cc|ncurses based ascii graphics|
+|no|AbstractClasses|interfaces.h|These abstract classes define the interfaces for the SimpleGame "engine".|
+||IntroCPP||The SimpleGame "engine" written using C++98|
+||AdvCPP||The SimpleGame "engine" written to take advantage of modern C++|
+|no|IntroCPP or AdvCPP|SimpleGame.x|The SimpleGame "engine"|
+|yes|Example|MySimpleGameIntro.cc|This is an introCPP example of how to instantiate and initialize the SimpleGame "engine"|
+|yes|Example|MySimpleGame.x|Examples of how to create classes for your game world and game characters.|
+
+Files listed as Have to modify - no:  Do not need to be modified to create your own game. If you want to improve the game engine,
+please fork, modify, and commit.
+I encourage you to fork this repsitory and commit your own games to share with others or, submit your games to share with others.
+
+
 # Program Flow
 
 ```
