@@ -1,8 +1,6 @@
 #ifndef INTERFACES_H
 #define INTERFACES_H
 
-#include <string>
-
 /******************************************************************************
  * @file   interfaces.h                                                       *
  * @author Eric Gregori -  https://github.com/egregori3                       *
@@ -64,6 +62,7 @@
  * @section SOURCES                                                           *
  *  https://github.com/egregori3/ConsoleGameEngine/blob/master/README.md      *
  ******************************************************************************/
+#include <string>
 
 /**
  * https://en.cppreference.com/w/cpp/language/enum
@@ -172,7 +171,7 @@ class character
  *  This means that changes made to the parameter affect the passed argument.
  *
  * @section DESCRIPTION
- *  init()         needs to return a string representing the background along 
+ *  get_world()    needs to return a string representing the background along 
  *                 with the number of rows and columns in the background
  *  get_state()    needs to return the world state based on the character state
  *  update_state() needs to update the world state based on the character state
