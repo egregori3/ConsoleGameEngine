@@ -60,6 +60,24 @@ The advanced CPP project does the same thing as the intro project but is written
  * https://www.codesdope.com/
  * https://www.cpp-junkie.com/
 
+# Files
+
+|Have to modify|Directory|Filename|Description|
+|--------------|---------|--------|-----------|
+||Graphics||The SimpleGame "engine" is graphics system independent (although it is only designed for 2D)|
+|no|Graphics/LinuxText|graphics.x|ncurses based ascii graphics|
+|no|AbstractClasses|interfaces.h|These abstract classes define the interfaces for the SimpleGame "engine".|
+||IntroCPP||The SimpleGame "engine" written using C++98|
+||AdvCPP||The SimpleGame "engine" written to take advantage of modern C++|
+|no|IntroCPP or AdvCPP|SimpleGame.x|The SimpleGame "engine"|
+|yes|Example|MySimpleGameIntro.cc|This is an introCPP example of how to instantiate and initialize the SimpleGame "engine"|
+|yes|Example|MySimpleGame.x|Examples of how to create classes for your game world and game characters.|
+
+Files listed as Have to modify - no:  Do not need to be modified to create your own game. If you want to improve the game engine,
+please fork, modify, and commit.
+I encourage you to fork this repsitory and commit your own games to share with others or, submit your games to share with others.
+
+
 # Program Flow
 
 ```
@@ -169,13 +187,13 @@ int main()
     //                \/ Create a new monster object in memory
     //                             \/ Pass the monster custructor a char_state_t structure
     //                                       \/ C trick for structure init
-    p_monsters[0] = new monster((char_state_t){99,19,15,eater,true});
-    p_monsters[1] = new monster((char_state_t){1,19,11,ghost,true});
-    p_monsters[2] = new monster((char_state_t){2,19,11,ghost,true});
-    p_monsters[3] = new monster((char_state_t){3,19,11,ghost,true});
-    p_monsters[4] = new monster((char_state_t){4,19,11,ghost,true});
-    p_monsters[5] = new monster((char_state_t){5,19,11,ghost,true});
-
+    p_monsters[0] = new monster((char_state_t){EATER_ID,19,15,eater,true});
+    p_monsters[1] = new monster((char_state_t){GHOST_TYPE2_ID,19,11,ghost,true});
+    p_monsters[2] = new monster((char_state_t){GHOST_TYPE1_ID,19,11,ghost,true});
+    p_monsters[3] = new monster((char_state_t){GHOST_TYPE1_ID,19,11,ghost,true});
+    p_monsters[4] = new monster((char_state_t){GHOST_TYPE2_ID,19,11,ghost,true});
+    p_monsters[5] = new monster((char_state_t){GHOST_TYPE1_ID,19,11,ghost,true});
+    
     for(int ii=0; ii<(ghosts+1); ii++)
     {
         sg.add_character(p_monsters[ii]);
@@ -195,3 +213,15 @@ int main()
 
 ```
 
+# How to make your own game
+
+MySimpleGame.h
+
+MySimpleGame.cc - Create your world and characters by deriving from the world and character abstract classes (inheritance)
+  
+MySimpleGameIntro.cc - Instantiate the SimplGame class and initialize it with your world and characters objects.
+                     
+                       The game loop takes control and will call the methods in your world and character objects.
+                       
+                       Your game is defined by the rules you code in your world and character derived classes.
+                       
