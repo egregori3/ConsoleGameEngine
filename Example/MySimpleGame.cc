@@ -42,8 +42,6 @@
  *          call new_char_state = character.update_state(ui, world_state)     *
  *          call world.update_state(new_char_state)                           *
  *                                                                            *
- * @section BUILD                                                             *
- *  g++ MySimpleGameIntro.cc MySimpleGame.cc ./IntroCPP/SimpleGame.cc -I./IntroCPP -I./
  *                                                                            *
  * @section HISTORY                                                           *
  *  12/21 Eric Gegori - File created                                          *
@@ -52,59 +50,106 @@
  *  @see https://www.cs.bu.edu/                                               *
  ******************************************************************************/
 
-extern std::string arena;
 
-// Game hyper-parameters
-const int  loop_rate_500ms = 500;
-const int  ghosts = 5;
-const char ghost = 'H'; // Initial "graphic" - can be overrriden by your derived class
-const char eater = '>';
+const std::string arena =
+  // 0         1         2         3        3
+  // 0123456789012345678901234567890123456789
+    "|======================================|" // 00
+    "|                  |                   |" // 01
+    "| |======| |=====| | |=====| |=======| |" // 02
+    "|                                      |" // 03
+    "| |======| |=| |=======| |=| |=======| |" // 04
+    "|          |=|    |=|    |=|           |" // 05
+    "|========| |====| |=| |====| |=========|" // 06
+    "         | |=|           |=| |          " // 07
+    "|========| |=| |=======| |=| |=========|" // 08
+    "               |       |                " // 09
+    "|========| |=| |=======| |=| |=========|" // 10
+    "         | |=|           |=| |          " // 11
+    "|========| |=| |=======| |=| |=========|" // 12
+    "|                 |=|                  |" // 13
+    "| |======| |====| |=| |====| |=======| |" // 14
+    "|      |=|                   |=|       |" // 15
+    "|====| |=| |=| |=======| |=| |=| |=====|" // 16
+    "|          |=|    |=|    |=|           |" // 17
+    "| |=============| |=| |==============| |" // 18
+    "|                                      |" // 19
+    "|======================================|";// 20
 
-int main()
+
+// https://www.cs.bu.edu/fac/gkollios/cs113/Slides/lect13.pdf
+eater_world::eater_world()
 {
-    // https://www.codesdope.com/cpp-array/
-    // https://www.learncpp.com/cpp-tutorial/null-pointers/
-    // https://en.cppreference.com/w/c/language/array_initialization
-    // https://en.cppreference.com/w/cpp/language/aggregate_initialization
-    // https://isocpp.org/wiki/faq/freestore-mgmt#null-or-zero
-    //
-    // This is dangerous!!!!
-    // int array[5] = {0}; will fill the array with 0.
-    // int array[5] = {3}; will ONLY set a[0] to 3, all others will be 0
-    // GCC provides a workaround for this, but it is compiler specific.
-    // monster *p_monsters[6] = { NULL }; // will work, but could burn you
-    monster *p_monsters[ghosts+1] = { NULL, NULL, NULL, NULL, NULL, NULL }; // safer
-
-    eater_world *p_world = new eater_world();
-    SimpleGame sg(p_world, loop_rate_500ms);
-
-    // char_state_t monster1 = {0,0,0,'<',true};     // init char_state_t structure
-    // monster *p_monster1 = new monster(monster1);  // create a new monster object in memory
-    // sg.add_character(p_monster1);
-    // I combined the above lines into a single line
-    //                \/ Create a new monster object in memory
-    //                             \/ Pass the monster custructor a char_state_t structure
-    //                                       \/ C trick for structure init
-    p_monsters[0] = new monster((char_state_t){99,19,15,eater,true});
-    p_monsters[1] = new monster((char_state_t){1,19,11,ghost,true});
-    p_monsters[2] = new monster((char_state_t){2,19,11,ghost,true});
-    p_monsters[3] = new monster((char_state_t){3,19,11,ghost,true});
-    p_monsters[4] = new monster((char_state_t){4,19,11,ghost,true});
-    p_monsters[5] = new monster((char_state_t){5,19,11,ghost,true});
-
-    for(int ii=0; ii<(ghosts+1); ii++)
-    {
-        sg.add_character(p_monsters[ii]);
-    }
-
-    sg.start_game();
-
-    // https://www.cpp-junkie.com/2020/04/c-delete-vs-delete.html
-    // If you allocate memory using new keyword make sure to deallocate memory 
-    // using delete keyword to avoid memory leaks. If you allocate an array of 
-    // memory using new[] deallocate memory using delete[] keyword.
-    for(int ii=0; ii<(ghosts+1); ii++)
-    {
-        delete p_monsters[ii];
-    }
+    std::cout << "eater_world: constructor" << std::endl;
 }
+
+error_code_t eater_world::get_world(std::string &background, int &rows, int &cols)
+{
+   std::cout << "eater_world: get_world" << std::endl;
+   background = arena;
+   rows       = 21;
+   cols       = 40;
+
+   return ERROR_NONE;
+}
+
+const world_state_t eater_world::get_state(const char_state_t char_state)
+{
+//        std::cout << "eater_world: get_state" << std::endl;
+        ws.row = char_state.row;
+        ws.col = char_state.col;
+        ws.upper_left_constraint    = 0;
+        ws.upper_middle_constraint  = 0;
+        ws.upper_right_constraint   = 0;
+        ws.middle_left_constraint   = 0;
+        ws.character                = char_state.c;
+        ws.lower_left_constraint    = 0;
+        ws.lower_middle_constraint  = 0;
+        ws.lower_right_constraint   = 0;
+
+    return ws;
+}
+
+error_code_t eater_world::update_state(const char_state_t char_state)
+{
+//        std::cout << "eater_world: update_state" << std::endl;
+        ws.row          = char_state.row;
+        ws.col          = char_state.col;
+        ws.character    = char_state.c;
+
+        return ERROR_NONE;
+}
+
+monster::monster(char_state_t initial_state)
+{
+    std::cout << "monster: constructor" << std::endl;
+    my_state = initial_state;
+}
+
+char_state_t monster::get_state(void)
+{
+//    std::cout << "monster: get_state" << std::endl;
+    return my_state;
+}
+
+char_state_t monster::update_state( const ui_t user_input, 
+                           const world_state_t world_state)
+{
+//    std::cout << "monster: update_state" << std::endl;
+    if(my_state.id == EATER_ID)
+    {
+        if((user_input == UI_UP))
+            my_state.row = my_state.row - 1;
+        else if((user_input == UI_DOWN))
+            my_state.row = my_state.row + 1;
+        else if((user_input == UI_LEFT))
+            my_state.col = my_state.col - 1;
+        else if((user_input == UI_RIGHT))
+            my_state.col = my_state.col + 1;
+    }
+
+    return my_state;
+}
+
+
+

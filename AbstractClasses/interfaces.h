@@ -8,6 +8,7 @@
  *                                                                            *
  * @brief                                                                     *
  *  interfaces (Abstract Base Classes)                                        *
+ *  YOU SHOULD NOT NEED TO EDIT THIS FILE.
  *                                                                            *
  * @section PURPOSE                                                           *
  *  The internet provides a wealth of valuable resources for a student        *
@@ -71,12 +72,19 @@
  */
 typedef enum
 {
+    UI_NONE,
     UI_UP,
     UI_DOWN,
     UI_LEFT,
     UI_RIGHT,
     UI_EXIT
 }   ui_t;
+
+typedef enum
+{
+    ERROR_NONE,
+    ERROR_NULL_PTR
+}   error_code_t;
 
 /**
  * https://www.guru99.com/cpp-structures.html
@@ -100,21 +108,21 @@ typedef enum
 typedef struct
 {
     int  id;        // id of character - the user can use for whatever they want
-    int  x;         // X position of character
-    int  y;         // Y position of character
-    char c;         // character to display
+    int  col;       // col position of character
+    int  row;       // row position of character
+    int  c;         // character to display
     bool display;   // set to true to display the character
 } char_state_t;
 
 typedef struct
 {
-    int  x;
-    int  y;
+    int  row;
+    int  col;
     char upper_left_constraint;
     char upper_middle_constraint;
     char upper_right_constraint;
     char middle_left_constraint;
-    char character;
+    int  character;
     char lower_left_constraint;
     char lower_middle_constraint;
     char lower_right_constraint;
@@ -186,10 +194,10 @@ class world
 {
     public:
         // pure virtual function (ZC8.4)
-        virtual int get_world( std::string &background, 
+        virtual error_code_t get_world( std::string &background, 
                                int &rows, int &cols) = 0;
         virtual const world_state_t get_state(const char_state_t char_state) = 0; 
-        virtual void update_state(const char_state_t char_state) = 0;
+        virtual error_code_t update_state(const char_state_t char_state) = 0;
 };
 
 #endif

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <memory>
 #include "interfaces.h"
+#include "graphics.h"
 
 
 /******************************************************************************
@@ -99,20 +100,22 @@ class SimpleGame
 {
     private:
         std::vector<character *> characters;
-        world *p_user_world;
+        world *p_user_world  = NULL;
+        graphics *p_graphics = NULL;
         std::string background;
+        int rows, cols;
         int loop_rate_in_ms;
 
     private:
         ui_t get_user_input(void);
-        int  init_background(std::string bg);
-        int  update_display(int x, int y, char c);
-        int game_loop(void);
+        bool         update_display(char_state_t old, char_state_t news);
+        error_code_t game_loop(void);
 
     public:
         SimpleGame( world *p_world, int loop_rate);
-        int add_character(character *p_user_char);
-        int start_game(void);
+        ~SimpleGame();
+        error_code_t add_character(character *p_user_char);
+        error_code_t start_game(void);
 };
 
 #endif
