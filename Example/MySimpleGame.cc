@@ -50,7 +50,8 @@
  *  @see https://www.cs.bu.edu/                                               *
  ******************************************************************************/
 
-
+const int wrows = 21;
+const int wcols = 40;
 const std::string arena =
   // 0         1         2         3        3
   // 0123456789012345678901234567890123456789
@@ -80,50 +81,50 @@ const std::string arena =
 // https://www.cs.bu.edu/fac/gkollios/cs113/Slides/lect13.pdf
 eater_world::eater_world()
 {
-    std::cout << "eater_world: constructor" << std::endl;
 }
 
 error_code_t eater_world::get_world(std::string &background, int &rows, int &cols)
 {
-   std::cout << "eater_world: get_world" << std::endl;
    background = arena;
-   rows       = 21;
-   cols       = 40;
+   rows       = wrows;
+   cols       = wcols;
 
    return ERROR_NONE;
 }
 
 const world_state_t eater_world::get_state(const char_state_t char_state)
 {
-//        std::cout << "eater_world: get_state" << std::endl;
-        ws.row = char_state.row;
-        ws.col = char_state.col;
-        ws.upper_left_constraint    = 0;
-        ws.upper_middle_constraint  = 0;
-        ws.upper_right_constraint   = 0;
-        ws.middle_left_constraint   = 0;
-        ws.character                = char_state.c;
-        ws.lower_left_constraint    = 0;
-        ws.lower_middle_constraint  = 0;
-        ws.lower_right_constraint   = 0;
+    world_state_t ws;
+    int row = char_state.row;
+    int col = char_state.col;
+
+    ws.c  = arena[row*wrows+col];
+    ws.tl = arena[(row-1)*wrows+(col-1)];
+    ws.tc = arena[(row-1)*wrows+(col+0)];
+    ws.tr = arena[(row-1)*wrows+(col+1)];
+
+    ws.cr = arena[(row-0)*wrows+(col+1)];
+    ws.cl = arena[(row+0)*wrows+(col-1)];
+
+    ws.br = arena[(row+1)*wrows+(col+1)];
+    ws.bc = arena[(row+1)*wrows+(col+0)];
+    ws.bl = arena[(row+1)*wrows+(col-1)];
 
     return ws;
 }
 
 error_code_t eater_world::update_state(const char_state_t char_state)
 {
-//        std::cout << "eater_world: update_state" << std::endl;
-        ws.row          = char_state.row;
-        ws.col          = char_state.col;
-        ws.character    = char_state.c;
-
         return ERROR_NONE;
 }
 
+/******************************************************************************/
+/******************************************************************************/
+
 monster::monster(char_state_t initial_state)
 {
-    std::cout << "monster: constructor" << std::endl;
-    my_state = initial_state;
+    my_state   = initial_state;
+    iterations = 0;
 }
 
 char_state_t monster::get_state(void)
@@ -132,21 +133,49 @@ char_state_t monster::get_state(void)
     return my_state;
 }
 
+bool pok(int input)
+{
+    if(input == ' ') return true;
+    return false;
+}
+
+void monster::update_eater( const ui_t user_input, const world_state_t ws)
+{
+    if((user_input == UI_UP) && (pok(ws.tc)))
+        my_state.row = my_state.row - 1;
+
+    if((user_input == UI_DOWN) && (pok(ws.bc)))
+        my_state.row = my_state.row + 1;
+
+    if((user_input == UI_LEFT) && (pok(ws.cl)))
+        my_state.col = my_state.col - 1;
+
+    if((user_input == UI_RIGHT) && (pok(ws.cr)))
+        my_state.col = my_state.col + 1;
+
+}
+
+void monster::update_monster( const world_state_t world_state)
+{
+    if((iterations % 20) == 0)
+    {
+    }
+}
+
 char_state_t monster::update_state( const ui_t user_input, 
-                           const world_state_t world_state)
+                                    const world_state_t world_state)
 {
 //    std::cout << "monster: update_state" << std::endl;
     if(my_state.id == EATER_ID)
     {
-        if((user_input == UI_UP))
-            my_state.row = my_state.row - 1;
-        else if((user_input == UI_DOWN))
-            my_state.row = my_state.row + 1;
-        else if((user_input == UI_LEFT))
-            my_state.col = my_state.col - 1;
-        else if((user_input == UI_RIGHT))
-            my_state.col = my_state.col + 1;
+        update_eater( user_input, world_state );
     }
+    else
+    {
+        update_monster( world_state );
+    }
+
+    iterations++;
 
     return my_state;
 }

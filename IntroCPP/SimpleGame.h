@@ -102,14 +102,13 @@ class SimpleGame
         std::vector<character *> characters;
         world *p_user_world  = NULL;
         graphics *p_graphics = NULL;
-        std::string background;
-        int rows, cols;
         int loop_rate_in_ms;
 
     private:
-        ui_t get_user_input(void);
+        ui_t         get_user_input(void);
         bool         update_display(char_state_t old, char_state_t news);
         error_code_t game_loop(void);
+        void         update_constraint_display(int row, int col);
 
     public:
         SimpleGame( world *p_world, int loop_rate);

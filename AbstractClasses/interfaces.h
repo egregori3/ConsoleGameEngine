@@ -83,7 +83,8 @@ typedef enum
 typedef enum
 {
     ERROR_NONE,
-    ERROR_NULL_PTR
+    ERROR_NULL_PTR,
+    ERROR_INIT
 }   error_code_t;
 
 /**
@@ -111,21 +112,21 @@ typedef struct
     int  col;       // col position of character
     int  row;       // row position of character
     int  c;         // character to display
+    int  replace;   // character to put into old position
     bool display;   // set to true to display the character
 } char_state_t;
 
 typedef struct
 {
-    int  row;
-    int  col;
-    char upper_left_constraint;
-    char upper_middle_constraint;
-    char upper_right_constraint;
-    char middle_left_constraint;
-    int  character;
-    char lower_left_constraint;
-    char lower_middle_constraint;
-    char lower_right_constraint;
+    int tl;  // top left
+    int tc;  // top center
+    int tr;  // top right
+    int cl;  // center left
+    int c;   // center
+    int cr;  // center right
+    int bl;  // bottom left
+    int bc;  // bottom center
+    int br;  // bottom right
 } world_state_t;
 
 /**

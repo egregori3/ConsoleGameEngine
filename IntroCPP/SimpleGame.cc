@@ -11,6 +11,16 @@
 #include "graphics.h"
 
 
+void SimpleGame::update_constraint_display(int row, int col)
+{
+    char_state_t cs;
+    cs.row = row;
+    cs.col = col.
+    world_state_t world_state = p_user_world->get_state(char_state);
+    p_graphics->write(old.row,  old.col,  news.replace);
+
+}
+
 error_code_t SimpleGame::game_loop(void)
 {
     if((p_user_world == NULL) || (p_graphics == NULL))
@@ -61,7 +71,7 @@ bool SimpleGame::update_display(char_state_t old, char_state_t news)
 
     if(changed == true)
     {
-        p_graphics->write(old.row,  old.col,  old.c);
+        p_graphics->write(old.row,  old.col,  news.replace);
         p_graphics->write(news.row, news.col, news.c);
         p_graphics->refresh();
     }
@@ -72,22 +82,36 @@ bool SimpleGame::update_display(char_state_t old, char_state_t news)
 error_code_t SimpleGame::add_character(character *p_user_char)
 {
     // https://www.oreilly.com/library/view/c-cookbook/0596007612/ch06s05.html
-    std::cout << "SimpleGame: add_character" << std::endl;
+
+    char_state_t new_char = p_user_char->get_state();
+    {
+        // If the character ID is already registered, return error
+        std::vector<character *>::iterator it;
+        for (it = characters.begin(); it != characters.end(); ++it)
+        {
+            character *p_base = *it;
+            char_state_t old_char = p_base->get_state();
+            if(new_char.id == old_char.id)
+                return ERROR_INIT;
+        }
+    }
     characters.push_back(p_user_char);
     return ERROR_NONE;
 }
 
 SimpleGame::SimpleGame(world *p_world, int loop_rate)
 {
-    std::cout << "SimpleGame: constructor" << std::endl;
-    p_world->get_world(background, rows, cols);
     p_user_world = p_world;
     loop_rate_in_ms = loop_rate;
 }
 
 error_code_t SimpleGame::start_game(void)
 {
-    std::cout << "START GAME" << std::endl;
+    std::string background;
+    int rows;
+    int cols;
+
+    p_user_world->get_world(background, rows, cols);
     p_graphics = new graphics(rows, cols);
     p_graphics->write(background);
     {
@@ -101,7 +125,6 @@ error_code_t SimpleGame::start_game(void)
         }
     }
     error_code_t result = game_loop();
-    std::cout << "GAME OVER" << std::endl;
     return result;
 }
 

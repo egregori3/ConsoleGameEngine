@@ -50,16 +50,13 @@
  ******************************************************************************/
 
 
-#define EATER_ID          0 // ID's can be any integer
-#define GHOST_TYPE1_ID    5 // The ghosts have either type 1
-#define GHOST_TYPE2_ID    7 // or type 2 personalities
+// Character ID's can be any integer, but each ID MUST be unique.
+#define EATER_ID          0
+#define GHOST_ID          10
 
 // https://www.cs.bu.edu/fac/gkollios/cs113/Slides/lect13.pdf
 class eater_world : public world
 {
-    private:
-        world_state_t ws;
-
     public:
         eater_world();
 
@@ -82,7 +79,12 @@ class monster : public character
 {
     private:
         char_state_t my_state;
+        int iterations;
 
+    private:
+        void update_eater( const ui_t user_input, const world_state_t world_state);
+        void update_monster( const world_state_t world_state);
+ 
     public:
         monster(char_state_t initial_state);
         char_state_t get_state(void);
