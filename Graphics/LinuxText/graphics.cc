@@ -84,7 +84,10 @@ int graphics::write(std::string bg)
 
 int graphics::write(int row, int col, int width, int height, std::string info)
 {
+
 #ifndef DEBUG
+    for(int ii=0; ii<width; ii++)
+        mvaddch(row, col+ii, ' ');
     mvaddstr(row, col, info.c_str());
 #else
     std::cout << "(" << row << "," << col << "," << width << "," << height << ")";

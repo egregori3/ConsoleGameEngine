@@ -102,17 +102,22 @@ const world_state_t eater_world::get_state(const char_state_t char_state)
     int col = char_state.col;
 
     ws.c  = arena[row*wrows+col];
-    ws.tl = arena[(row-1)*wrows+(col-1)];
-    ws.tc = arena[(row-1)*wrows+(col+0)];
-    ws.tr = arena[(row-1)*wrows+(col+1)];
+    ws.tl = arena[(row-1)*wcols+(col-1)];
+    ws.tc = arena[(row-1)*wcols+(col+0)];
+    ws.tr = arena[(row-1)*wcols+(col+1)];
 
-    ws.cr = arena[(row-0)*wrows+(col+1)];
-    ws.cl = arena[(row+0)*wrows+(col-1)];
+    ws.cr = arena[(row-0)*wcols+(col+1)];
+    ws.cl = arena[(row+0)*wcols+(col-1)];
 
-    ws.br = arena[(row+1)*wrows+(col+1)];
-    ws.bc = arena[(row+1)*wrows+(col+0)];
-    ws.bl = arena[(row+1)*wrows+(col-1)];
-//    std::cout << "update: " << ws.tc << "," << ws.bc << "," << ws.cl << "," << ws.cr << std::endl;
+    ws.br = arena[(row+1)*wcols+(col+1)];
+    ws.bc = arena[(row+1)*wcols+(col+0)];
+    ws.bl = arena[(row+1)*wcols+(col-1)];
+    oss << "word: " << row   << ","
+                    << col   << ","
+                    << ws.tc << "," 
+                    << ws.bc << "," 
+                    << ws.cl << "," 
+                    << ws.cr;
 
     return ws;
 }
@@ -125,8 +130,8 @@ error_code_t eater_world::update_state(const char_state_t char_state)
 bool eater_world::get_display_info(info_window_t **pp_iw, std::string &message)
 {
     *pp_iw = (info_window_t *)&debug1;
-    message = "Hello from eater world";
-//    oss << "Hello from eater world";
+    message = oss.str();
+    oss.str("");
 }
 
 /******************************************************************************/
@@ -146,13 +151,18 @@ char_state_t monster::get_state(void)
 
 bool pok(int input)
 {
-//    if(input == ' ') return true;
-    return true;
+    if(input == ' ') return true;
+    return false;
 }
 
 void monster::update_eater( const ui_t user_input, const world_state_t ws)
 {
-//    std::cout << "test: " << ws.tc << "," << ws.bc << "," << ws.cl << "," << ws.cr << std::endl;
+    oss << "test: " << my_state.row << ","
+                    << my_state.col << ","
+                    << ws.tc << "," 
+                    << ws.bc << "," 
+                    << ws.cl << "," 
+                    << ws.cr;
     if((user_input == UI_UP) && (pok(ws.tc)))
         my_state.row = my_state.row - 1;
 
@@ -195,7 +205,11 @@ char_state_t monster::update_state( const ui_t user_input,
 bool monster::get_display_info(info_window_t **pp_iw, std::string &message)
 {
     *pp_iw = (info_window_t *)&debug2;
-    message = "Hello from monster id: ";
-//    oss << "Hello from monster id: " << my_state.id;
+    oss.clear();
+    message = oss.str();
+    oss.str("");
+    if(my_state.id == EATER_ID)
+        return true;
+    return false;
 }
 

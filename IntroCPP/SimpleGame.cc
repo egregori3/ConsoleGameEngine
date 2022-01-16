@@ -15,21 +15,25 @@ void update_info_display(void *p_object, char type, graphics *p_graphics)
 {
     info_window_t *p_iw = NULL;
     std::string message;
+    bool update = false;
 
     switch( type )
     {
         case 'c':
-            ((character *)p_object)->get_display_info(&p_iw, message);
+            update = ((character *)p_object)->get_display_info(&p_iw, message);
             break;
         case 'w':
-            ((world *)p_object)->get_display_info(&p_iw, message);
+            update = ((world *)p_object)->get_display_info(&p_iw, message);
             break;
         default:
             return;
     }
 
-    p_graphics->write(  p_iw->row_start, p_iw->col_start, 
-                        p_iw->width, p_iw->height, message);
+    if(update)
+    {
+        p_graphics->write(  p_iw->row_start, p_iw->col_start, 
+                            p_iw->width, p_iw->height, message);
+    }
 }
 
 error_code_t SimpleGame::game_loop(void)
