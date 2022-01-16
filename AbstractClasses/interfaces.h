@@ -129,6 +129,15 @@ typedef struct
     int br;  // bottom right
 } world_state_t;
 
+typedef struct
+{
+    int row_start;
+    int col_start;
+    int width;
+    int height;
+} info_window_t;
+
+
 /**
  * @class character
  *
@@ -159,6 +168,7 @@ class character
         virtual char_state_t get_state(void) = 0;
         virtual char_state_t update_state( const ui_t user_input, 
                                            const world_state_t world_state) = 0;
+        virtual bool get_display_info(info_window_t **pp_iw, std::string &message) = 0;
 };
 
 
@@ -199,6 +209,7 @@ class world
                                int &rows, int &cols) = 0;
         virtual const world_state_t get_state(const char_state_t char_state) = 0; 
         virtual error_code_t update_state(const char_state_t char_state) = 0;
+        virtual bool get_display_info(info_window_t **pp_iw, std::string &message) = 0;
 };
 
 #endif

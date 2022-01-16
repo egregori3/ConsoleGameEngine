@@ -15,6 +15,10 @@
  *  https://github.com/egregori3/ConsoleGameEngine/blob/master/README.md      *
  *  https://opensource.com/article/21/8/ncurses-linux                         *
  *  https://tldp.org/HOWTO/NCURSES-Programming-HOWTO/windows.html             *
+ *  https://tldp.org/HOWTO/NCURSES-Programming-HOWTO/                         *
+ *  https://www.cplusplus.com/doc/tutorial/preprocessor/                      *
+ *  https://gcc.gnu.org/onlinedocs/cpp/                                       *
+ *                                                                            *
  ******************************************************************************/
 #include <string>
 #include <ncurses.h>
@@ -22,28 +26,35 @@
 #include "interfaces.h"
 #include "graphics.h"
 
+#define DEBUG   // If DEBUG is defined, graphics are disabled
 
 graphics::graphics(int rows, int cols)
 {
     std::cout << "LinuxText graphics init" << " Rows: " << rows << " Cols: " << cols << std::endl;
+    std::cout << "Press ANY KEY to start game" << std::endl;
+    std::cin.get();
+#ifndef DEBUG
     initscr(); // Start curses mode 
     cbreak();  // Line buffering disabled, Pass on everty thing to me
     keypad(stdscr, TRUE);   /* I need that nifty F1 */
-    my_win = newwin(rows, cols, 0, 0);
+//    my_win = newwin(rows, cols, 0, 0);
     curs_set(0);
+#endif
     width  = cols;
     height = rows;
 }
 
 graphics::~graphics()
 {
-    delwin(my_win);
-    endwin(); /* End curses mode */
     std::cout << "LinuxText graphics shutdown" << std::endl;
+#ifndef DEBUG
+    endwin(); /* End curses mode */
+#endif
 }
 
 int graphics::write( int row_start, int col_start, std::string bg, int cols)
 {
+#ifndef DEBUG
     int row = row_start;
     int col = col_start;
     for (auto it = bg.cbegin() ; it != bg.cend(); ++it)
@@ -55,30 +66,44 @@ int graphics::write( int row_start, int col_start, std::string bg, int cols)
             col = 0;
         }
     }
-
+#endif
     return 0;        
 }
 
 int graphics::write(std::string bg)
 {
+#ifndef DEBUG
     write(0, 0, bg, width);
-    wrefresh(my_win);
+    refresh();
     write(0, 0, bg, width);
-    wrefresh(my_win);
-
+    refresh();
+#endif
     return 0;
+}
+
+int graphics::write(int row, int col, int width, int height, std::string info)
+{
+#ifndef DEBUG
+    mvaddstr(row, col, info.c_str());
+#else
+    std::cout << info << std::endl;
+#endif
 }
 
 int graphics::write(int row, int col, int c)
 {
+#ifndef DEBUG
     mvaddch(row, col, (char)c);
+#else
+    std::cout << "graphics::write(" << row << " , " << col << " = " << c << std::endl;
+#endif
     return 0;
 }
 
 ui_t graphics::get_input(void)
 {
-    int ch = getch();
     ui_t output = UI_NONE;
+    int ch = getch();
 
     switch(ch)
     {
@@ -101,14 +126,12 @@ ui_t graphics::get_input(void)
         default:
             break;
     }
-
     return output;
 }
 
 int graphics::refresh(void)
 {
-    wrefresh(my_win);
-
+//    refresh();  This is disabled because it causes a seg fault
     return 0;
 }
 

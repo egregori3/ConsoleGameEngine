@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include "interfaces.h"
 #include "SimpleGame.h"
 
@@ -57,12 +58,17 @@
 // https://www.cs.bu.edu/fac/gkollios/cs113/Slides/lect13.pdf
 class eater_world : public world
 {
+    private:
+        // https://www.cplusplus.com/reference/sstream/ostringstream/str/
+        //std::ostringstream oss; 
+
     public:
         eater_world();
 
         error_code_t get_world(std::string &background, int &rows, int &cols);
         const world_state_t get_state(const char_state_t char_state);
         error_code_t update_state(const char_state_t char_state);
+        bool get_display_info(info_window_t **pp_iw, std::string &message);
 };
 
 /**
@@ -80,6 +86,8 @@ class monster : public character
     private:
         char_state_t my_state;
         int iterations;
+        // https://www.cplusplus.com/reference/sstream/ostringstream/str/
+        //std::ostringstream oss; 
 
     private:
         void update_eater( const ui_t user_input, const world_state_t world_state);
@@ -90,6 +98,7 @@ class monster : public character
         char_state_t get_state(void);
         char_state_t update_state( const ui_t user_input, 
                                    const world_state_t world_state);
+        bool get_display_info(info_window_t **pp_iw, std::string &message);
 };
 
 

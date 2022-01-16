@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include "interfaces.h"
 #include "SimpleGame.h"
 #include "MySimpleGame.h"
@@ -77,6 +78,8 @@ const std::string arena =
     "|                                      |" // 19
     "|======================================|";// 20
 
+const info_window_t debug1 = {25,40,40,1};
+const info_window_t debug2 = {25,0,40,1};
 
 // https://www.cs.bu.edu/fac/gkollios/cs113/Slides/lect13.pdf
 eater_world::eater_world()
@@ -109,6 +112,7 @@ const world_state_t eater_world::get_state(const char_state_t char_state)
     ws.br = arena[(row+1)*wrows+(col+1)];
     ws.bc = arena[(row+1)*wrows+(col+0)];
     ws.bl = arena[(row+1)*wrows+(col-1)];
+    std::cout << "update: " << ws.tc << "," << ws.bc << "," << ws.cl << "," << ws.cr << std::endl;
 
     return ws;
 }
@@ -116,6 +120,13 @@ const world_state_t eater_world::get_state(const char_state_t char_state)
 error_code_t eater_world::update_state(const char_state_t char_state)
 {
         return ERROR_NONE;
+}
+
+bool eater_world::get_display_info(info_window_t **pp_iw, std::string &message)
+{
+    *pp_iw = (info_window_t *)&debug1;
+    message = "Hello from eater world";
+//    oss << "Hello from eater world";
 }
 
 /******************************************************************************/
@@ -135,12 +146,13 @@ char_state_t monster::get_state(void)
 
 bool pok(int input)
 {
-    if(input == ' ') return true;
-    return false;
+//    if(input == ' ') return true;
+    return true;
 }
 
 void monster::update_eater( const ui_t user_input, const world_state_t ws)
 {
+    std::cout << "test: " << ws.tc << "," << ws.bc << "," << ws.cl << "," << ws.cr << std::endl;
     if((user_input == UI_UP) && (pok(ws.tc)))
         my_state.row = my_state.row - 1;
 
@@ -180,5 +192,10 @@ char_state_t monster::update_state( const ui_t user_input,
     return my_state;
 }
 
-
+bool monster::get_display_info(info_window_t **pp_iw, std::string &message)
+{
+    *pp_iw = (info_window_t *)&debug2;
+    message = "Hello from monster id: ";
+//    oss << "Hello from monster id: " << my_state.id;
+}
 

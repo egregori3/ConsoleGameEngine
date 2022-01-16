@@ -16,7 +16,6 @@
  *   int get_input(void)                                                      *
  *   int refresh()                                                            *
  *                                                                            *
- *                                                                            *
  * @section HISTORY                                                           *
  *  12/21 Eric Gegori - File created                                          *
  *                                                                            *
@@ -28,7 +27,6 @@
 class graphics
 {
     private:
-        WINDOW *my_win;
         int     width, height;
         int     write(int row_start, int col_start, std::string bg, int cols);
 
@@ -39,6 +37,7 @@ class graphics
         int write(int x, int y, int c);
         ui_t get_input(void);
         int refresh(void);
+        int write(int row, int col, int width, int height, std::string info);
 };
 
 #endif

@@ -11,16 +11,6 @@
 #include "graphics.h"
 
 
-void SimpleGame::update_constraint_display(int row, int col)
-{
-    char_state_t cs;
-    cs.row = row;
-    cs.col = col.
-    world_state_t world_state = p_user_world->get_state(char_state);
-    p_graphics->write(old.row,  old.col,  news.replace);
-
-}
-
 error_code_t SimpleGame::game_loop(void)
 {
     if((p_user_world == NULL) || (p_graphics == NULL))
@@ -46,6 +36,11 @@ error_code_t SimpleGame::game_loop(void)
             bool changed = update_display(char_state, new_char_state);
             if(changed == true)
                 p_user_world->update_state(new_char_state);
+//            info_window_t *p_iw = NULL;
+//            std::string message;
+//            p_base->get_display_info(&p_iw, message);
+//            p_graphics->write(  p_iw->row_start, p_iw->col_start, 
+//                                p_iw->width, p_iw->height, message);
         }
 
         if(ui == UI_EXIT)
