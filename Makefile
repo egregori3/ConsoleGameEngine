@@ -15,3 +15,10 @@ LDFLAGS  = -lncurses
 
 mygame: $(obj)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+
+clean:
+	rm IntroCPP/*.o
+	rm Graphics/$(graphics)/*.o
+	rm Example/*.o
+
+

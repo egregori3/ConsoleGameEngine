@@ -112,7 +112,7 @@ const world_state_t eater_world::get_state(const char_state_t char_state)
     ws.br = arena[(row+1)*wrows+(col+1)];
     ws.bc = arena[(row+1)*wrows+(col+0)];
     ws.bl = arena[(row+1)*wrows+(col-1)];
-    std::cout << "update: " << ws.tc << "," << ws.bc << "," << ws.cl << "," << ws.cr << std::endl;
+//    std::cout << "update: " << ws.tc << "," << ws.bc << "," << ws.cl << "," << ws.cr << std::endl;
 
     return ws;
 }
@@ -152,7 +152,7 @@ bool pok(int input)
 
 void monster::update_eater( const ui_t user_input, const world_state_t ws)
 {
-    std::cout << "test: " << ws.tc << "," << ws.bc << "," << ws.cl << "," << ws.cr << std::endl;
+//    std::cout << "test: " << ws.tc << "," << ws.bc << "," << ws.cl << "," << ws.cr << std::endl;
     if((user_input == UI_UP) && (pok(ws.tc)))
         my_state.row = my_state.row - 1;
 

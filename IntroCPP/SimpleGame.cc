@@ -11,6 +11,27 @@
 #include "graphics.h"
 
 
+void update_info_display(void *p_object, char type, graphics *p_graphics)
+{
+    info_window_t *p_iw = NULL;
+    std::string message;
+
+    switch( type )
+    {
+        case 'c':
+            ((character *)p_object)->get_display_info(&p_iw, message);
+            break;
+        case 'w':
+            ((world *)p_object)->get_display_info(&p_iw, message);
+            break;
+        default:
+            return;
+    }
+
+    p_graphics->write(  p_iw->row_start, p_iw->col_start, 
+                        p_iw->width, p_iw->height, message);
+}
+
 error_code_t SimpleGame::game_loop(void)
 {
     if((p_user_world == NULL) || (p_graphics == NULL))
@@ -36,12 +57,9 @@ error_code_t SimpleGame::game_loop(void)
             bool changed = update_display(char_state, new_char_state);
             if(changed == true)
                 p_user_world->update_state(new_char_state);
-//            info_window_t *p_iw = NULL;
-//            std::string message;
-//            p_base->get_display_info(&p_iw, message);
-//            p_graphics->write(  p_iw->row_start, p_iw->col_start, 
-//                                p_iw->width, p_iw->height, message);
+            update_info_display(p_base, 'c', p_graphics);
         }
+        update_info_display(p_user_world, 'w', p_graphics);
 
         if(ui == UI_EXIT)
             running = false;

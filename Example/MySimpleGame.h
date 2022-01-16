@@ -60,7 +60,7 @@ class eater_world : public world
 {
     private:
         // https://www.cplusplus.com/reference/sstream/ostringstream/str/
-        //std::ostringstream oss; 
+        std::ostringstream oss; 
 
     public:
         eater_world();
@@ -87,7 +87,7 @@ class monster : public character
         char_state_t my_state;
         int iterations;
         // https://www.cplusplus.com/reference/sstream/ostringstream/str/
-        //std::ostringstream oss; 
+        std::ostringstream oss; 
 
     private:
         void update_eater( const ui_t user_input, const world_state_t world_state);

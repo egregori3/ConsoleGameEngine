@@ -26,7 +26,7 @@
 #include "interfaces.h"
 #include "graphics.h"
 
-#define DEBUG   // If DEBUG is defined, graphics are disabled
+//#define DEBUG   // If DEBUG is defined, graphics are disabled
 
 graphics::graphics(int rows, int cols)
 {
@@ -36,6 +36,7 @@ graphics::graphics(int rows, int cols)
 #ifndef DEBUG
     initscr(); // Start curses mode 
     cbreak();  // Line buffering disabled, Pass on everty thing to me
+    nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);   /* I need that nifty F1 */
 //    my_win = newwin(rows, cols, 0, 0);
     curs_set(0);
@@ -86,7 +87,8 @@ int graphics::write(int row, int col, int width, int height, std::string info)
 #ifndef DEBUG
     mvaddstr(row, col, info.c_str());
 #else
-    std::cout << info << std::endl;
+    std::cout << "(" << row << "," << col << "," << width << "," << height << ")";
+    std::cout << "  info: "<< info << std::endl;
 #endif
 }
 
