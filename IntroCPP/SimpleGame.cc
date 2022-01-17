@@ -53,7 +53,6 @@ error_code_t SimpleGame::game_loop(void)
         for (it = characters.begin(); it != characters.end(); ++it)
         {
             character *p_base = *it;
-
             char_state_t char_state     = p_base->get_state();
             world_state_t world_state   = p_user_world->get_state(char_state);
             ui                          = get_user_input();

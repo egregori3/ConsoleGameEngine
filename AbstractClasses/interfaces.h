@@ -65,6 +65,8 @@
  ******************************************************************************/
 #include <string>
 
+//#define DISABLE_GRAPHICS // if DISABLE_GRAPHICS is defined, graphics are disabled
+
 /**
  * https://en.cppreference.com/w/cpp/language/enum
  * An enumeration is a distinct type whose value is restricted to a range of values, 
@@ -109,8 +111,8 @@ typedef enum
 typedef struct
 {
     int  id;        // id of character - the user can use for whatever they want
-    int  col;       // col position of character
     int  row;       // row position of character
+    int  col;       // col position of character
     int  c;         // character to display
     int  replace;   // character to put into old position
     bool display;   // set to true to display the character

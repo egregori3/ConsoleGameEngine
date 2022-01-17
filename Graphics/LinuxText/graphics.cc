@@ -26,14 +26,13 @@
 #include "interfaces.h"
 #include "graphics.h"
 
-//#define DEBUG   // If DEBUG is defined, graphics are disabled
 
 graphics::graphics(int rows, int cols)
 {
     std::cout << "LinuxText graphics init" << " Rows: " << rows << " Cols: " << cols << std::endl;
     std::cout << "Press ANY KEY to start game" << std::endl;
     std::cin.get();
-#ifndef DEBUG
+#ifndef DISABLE_GRAPHICS
     initscr(); // Start curses mode 
     cbreak();  // Line buffering disabled, Pass on everty thing to me
     nodelay(stdscr, TRUE);
@@ -48,14 +47,14 @@ graphics::graphics(int rows, int cols)
 graphics::~graphics()
 {
     std::cout << "LinuxText graphics shutdown" << std::endl;
-#ifndef DEBUG
+#ifndef DISABLE_GRAPHICS
     endwin(); /* End curses mode */
 #endif
 }
 
 int graphics::write( int row_start, int col_start, std::string bg, int cols)
 {
-#ifndef DEBUG
+#ifndef DISABLE_GRAPHICS
     int row = row_start;
     int col = col_start;
     for (auto it = bg.cbegin() ; it != bg.cend(); ++it)
@@ -73,7 +72,7 @@ int graphics::write( int row_start, int col_start, std::string bg, int cols)
 
 int graphics::write(std::string bg)
 {
-#ifndef DEBUG
+#ifndef DISABLE_GRAPHICS
     write(0, 0, bg, width);
     refresh();
     write(0, 0, bg, width);
@@ -85,7 +84,7 @@ int graphics::write(std::string bg)
 int graphics::write(int row, int col, int width, int height, std::string info)
 {
 
-#ifndef DEBUG
+#ifndef DISABLE_GRAPHICS
     for(int ii=0; ii<width; ii++)
         mvaddch(row, col+ii, ' ');
     mvaddstr(row, col, info.c_str());
@@ -97,7 +96,7 @@ int graphics::write(int row, int col, int width, int height, std::string info)
 
 int graphics::write(int row, int col, int c)
 {
-#ifndef DEBUG
+#ifndef DISABLE_GRAPHICS
     mvaddch(row, col, (char)c);
 #else
     std::cout << "graphics::write(" << row << " , " << col << " = " << c << std::endl;
