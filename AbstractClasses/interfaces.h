@@ -64,6 +64,8 @@
  *  https://github.com/egregori3/ConsoleGameEngine/blob/master/README.md      *
  ******************************************************************************/
 #include <string>
+#include <sstream>
+#include <vector>
 
 //#define DISABLE_GRAPHICS // if DISABLE_GRAPHICS is defined, graphics are disabled
 
@@ -110,12 +112,23 @@ typedef enum
  */
 typedef struct
 {
+    int         row_start;
+    int         col_start;
+    int         width;
+    int         height;
+    // https://www.cplusplus.com/reference/sstream/ostringstream/str/
+    std::string message; 
+} info_window_t;
+
+typedef struct
+{
     int  id;        // id of character - the user can use for whatever they want
     int  row;       // row position of character
     int  col;       // col position of character
     int  c;         // character to display
     int  replace;   // character to put into old position
     bool display;   // set to true to display the character
+    bool game_over; // set to end the game
 } char_state_t;
 
 typedef struct
@@ -130,14 +143,6 @@ typedef struct
     int bc;  // bottom center
     int br;  // bottom right
 } world_state_t;
-
-typedef struct
-{
-    int row_start;
-    int col_start;
-    int width;
-    int height;
-} info_window_t;
 
 
 /**
@@ -170,7 +175,7 @@ class character
         virtual char_state_t get_state(void) = 0;
         virtual char_state_t update_state( const ui_t user_input, 
                                            const world_state_t world_state) = 0;
-        virtual bool get_display_info(info_window_t **pp_iw, std::string &message) = 0;
+        virtual void get_display_info(std::vector<info_window_t> &info_window_list) = 0;
 };
 
 
@@ -208,10 +213,10 @@ class world
     public:
         // pure virtual function (ZC8.4)
         virtual error_code_t get_world( std::string &background, 
-                               int &rows, int &cols) = 0;
+                               int &row_start, int &col_start, int &rows, int &cols) = 0;
         virtual const world_state_t get_state(const char_state_t char_state) = 0; 
         virtual error_code_t update_state(const char_state_t char_state) = 0;
-        virtual bool get_display_info(info_window_t **pp_iw, std::string &message) = 0;
+        virtual void get_display_info(std::vector<info_window_t> &info_window_list) = 0;
 };
 
 #endif

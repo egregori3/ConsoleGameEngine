@@ -33,7 +33,7 @@ class graphics
     public:
         graphics(int rows, int cols);
         ~graphics();
-        int write(std::string background);
+        int write(int row_start, int col_start, std::string bg);
         int write(int x, int y, int c);
         ui_t get_input(void);
         int refresh(void);

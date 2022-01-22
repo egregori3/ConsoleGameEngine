@@ -65,10 +65,11 @@ class eater_world : public world
     public:
         eater_world();
 
-        error_code_t get_world(std::string &background, int &rows, int &cols);
+        error_code_t get_world(std::string &background,
+                int &row_start, int &col_start, int &rows, int &cols);
         const world_state_t get_state(const char_state_t char_state);
         error_code_t update_state(const char_state_t char_state);
-        bool get_display_info(info_window_t **pp_iw, std::string &message);
+        void get_display_info(std::vector<info_window_t> &info_window_list);
 };
 
 /**
@@ -88,6 +89,8 @@ class monster : public character
         int iterations;
         // https://www.cplusplus.com/reference/sstream/ostringstream/str/
         std::ostringstream oss; 
+        int score;
+        int state;
 
     private:
         void update_eater( const ui_t user_input, const world_state_t world_state);
@@ -98,7 +101,7 @@ class monster : public character
         char_state_t get_state(void);
         char_state_t update_state( const ui_t user_input, 
                                    const world_state_t world_state);
-        bool get_display_info(info_window_t **pp_iw, std::string &message);
+        void get_display_info(std::vector<info_window_t> &info_window_list);
 };
 
 

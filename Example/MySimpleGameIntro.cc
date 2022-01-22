@@ -60,6 +60,10 @@ const int  ghosts = 5;
 const char ghost = 'H'; // Initial "graphic" - can be overrriden by your derived class
 const char eater = '>';
 const char replace = ' ';
+const int  eater_row_init = 16;
+const int  eater_col_init = 19;
+const int  ghost_row_init = 12;
+const int  ghost_col_init = 17;
 
 int main()
 {
@@ -94,12 +98,18 @@ int main()
         //                \/ Create a new monster object in memory
         //                             \/ Pass the monster custructor a char_state_t structure
         //                                       \/ C trick for structure init
-        p_monsters[0] = new monster((char_state_t){EATER_ID,15,19,eater,replace,true});
-        p_monsters[1] = new monster((char_state_t){GHOST_ID,11,17,ghost,replace,true});
-        p_monsters[2] = new monster((char_state_t){GHOST_ID+1,11,18,ghost,replace,true});
-        p_monsters[3] = new monster((char_state_t){GHOST_ID+2,11,19,ghost,replace,true});
-        p_monsters[4] = new monster((char_state_t){GHOST_ID+3,11,20,ghost,replace,true});
-        p_monsters[5] = new monster((char_state_t){GHOST_ID+4,11,21,ghost,replace,true});
+        p_monsters[0] = new monster((char_state_t){EATER_ID,eater_row_init,eater_col_init,
+                eater,replace,true});
+        p_monsters[1] = new monster((char_state_t){GHOST_ID,ghost_row_init,ghost_col_init,
+                ghost,replace,true});
+        p_monsters[2] = new monster((char_state_t){GHOST_ID+1,ghost_row_init,ghost_col_init+1,
+                ghost,replace,true});
+        p_monsters[3] = new monster((char_state_t){GHOST_ID+2,ghost_row_init,ghost_col_init+2,
+                ghost,replace,true});
+        p_monsters[4] = new monster((char_state_t){GHOST_ID+3,ghost_row_init,ghost_col_init+3,
+                ghost,replace,true});
+        p_monsters[5] = new monster((char_state_t){GHOST_ID+4,ghost_row_init,ghost_col_init+4,
+                ghost,replace,true});
 
         // Add each character to the SimpleGame object
         for(int ii=0; ii<(ghosts+1); ii++)

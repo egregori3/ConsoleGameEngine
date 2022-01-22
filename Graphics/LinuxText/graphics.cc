@@ -70,12 +70,12 @@ int graphics::write( int row_start, int col_start, std::string bg, int cols)
     return 0;        
 }
 
-int graphics::write(std::string bg)
+int graphics::write(int row_start, int col_start, std::string bg)
 {
 #ifndef DISABLE_GRAPHICS
-    write(0, 0, bg, width);
+    write(row_start, col_start, bg, width);
     refresh();
-    write(0, 0, bg, width);
+    write(row_start, col_start, bg, width);
     refresh();
 #endif
     return 0;

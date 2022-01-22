@@ -51,8 +51,18 @@
  *  @see https://www.cs.bu.edu/                                               *
  ******************************************************************************/
 
+typedef struct
+{
+    bool inc_score;
+    bool die;
+} eater_state_t;
+
+
 const int wrows = 21;
 const int wcols = 40;
+const int wrow_start = 1;
+const int wcol_start = 0;
+
 const std::string arena =
   // 0         1         2         3        3
   // 0123456789012345678901234567890123456789
@@ -78,6 +88,7 @@ const std::string arena =
     "|* * * * * * * * * * * * * * * * * *  *|" // 19
     "|======================================|";// 20
 
+const info_window_t score  = {0,0,40,1};
 const info_window_t debug1 = {25,40,40,1};
 const info_window_t debug2 = {25,0,40,1};
 
@@ -86,11 +97,14 @@ eater_world::eater_world()
 {
 }
 
-error_code_t eater_world::get_world(std::string &background, int &rows, int &cols)
+error_code_t eater_world::get_world(std::string &background, 
+        int &row_start, int &col_start, int &rows, int &cols)
 {
    background = arena;
    rows       = wrows;
    cols       = wcols;
+   row_start  = wrow_start;
+   col_start  = wcol_start;
 
    return ERROR_NONE;
 }
@@ -98,8 +112,8 @@ error_code_t eater_world::get_world(std::string &background, int &rows, int &col
 const world_state_t eater_world::get_state(const char_state_t char_state)
 {
     world_state_t ws;
-    int row = char_state.row;
-    int col = char_state.col;
+    int row = char_state.row - wrow_start;
+    int col = char_state.col - wcol_start;
 
     ws.c  = arena[row*wrows+col];
     ws.tl = arena[(row-1)*wcols+(col-1)];
@@ -121,12 +135,8 @@ error_code_t eater_world::update_state(const char_state_t char_state)
         return ERROR_NONE;
 }
 
-bool eater_world::get_display_info(info_window_t **pp_iw, std::string &message)
+void eater_world::get_display_info(std::vector<info_window_t> &info_window_list)
 {
-    *pp_iw = (info_window_t *)&debug1;
-    message = oss.str();
-    oss.str("");
-    return false;
 }
 
 /******************************************************************************/
@@ -136,6 +146,8 @@ monster::monster(char_state_t initial_state)
 {
     my_state   = initial_state;
     iterations = 0;
+    score      = 0;
+    state      = 0;
 }
 
 char_state_t monster::get_state(void)
@@ -144,31 +156,56 @@ char_state_t monster::get_state(void)
     return my_state;
 }
 
-bool pok(int input)
+bool eater_test(int input, eater_state_t &retdata)
 {
-    if((input == ' ') || (input == '*')) return true;
-    return false;
+    bool move = false;
+    if(input == ' ') 
+        move = true;
+    if(input == '*')
+    {
+        retdata.inc_score = true;
+        move = true;
+    }
+    if(input == 'H')
+    {
+        retdata.die = true;
+        move = false;
+    }
+    return move;
 }
 
 void monster::update_eater( const ui_t user_input, const world_state_t ws)
 {
-    oss << "test: " << my_state.row << ","
-                    << my_state.col << ","
-                    << ws.tc << "," 
-                    << ws.bc << "," 
-                    << ws.cl << "," 
-                    << ws.cr;
-    if((user_input == UI_UP) && (pok(ws.tc)))
+    eater_state_t retdata = {   .inc_score = false,
+                                .die       = false};
+
+//    oss << "test: " << my_state.row << ","
+//                    << my_state.col << ","
+//                    << ws.tc << "," 
+//                    << ws.bc << "," 
+//                    << ws.cl << "," 
+//                    << ws.cr;
+    if((user_input == UI_UP) && (eater_test(ws.tc,   retdata)))
         my_state.row = my_state.row - 1;
 
-    if((user_input == UI_DOWN) && (pok(ws.bc)))
+    if((user_input == UI_DOWN) && (eater_test(ws.bc, retdata)))
         my_state.row = my_state.row + 1;
 
-    if((user_input == UI_LEFT) && (pok(ws.cl)))
+    if((user_input == UI_LEFT) && (eater_test(ws.cl, retdata)))
         my_state.col = my_state.col - 1;
 
-    if((user_input == UI_RIGHT) && (pok(ws.cr)))
+    if((user_input == UI_RIGHT) && (eater_test(ws.cr,retdata)))
         my_state.col = my_state.col + 1;
+
+    if(retdata.inc_score == true)
+    {
+        score++;
+    }
+
+    if(retdata.die == true)
+    {
+        state = 1;
+    }
 
 }
 
@@ -182,10 +219,39 @@ void monster::update_monster( const world_state_t world_state)
 char_state_t monster::update_state( const ui_t user_input, 
                                     const world_state_t world_state)
 {
-//    std::cout << "monster: update_state" << std::endl;
     if(my_state.id == EATER_ID)
     {
-        update_eater( user_input, world_state );
+        if(state == 0)
+        {
+            update_eater( user_input, world_state );
+        }
+        else
+        {
+            if(iterations%10)
+            {
+                switch(state)
+                {
+                    case 1:
+                        my_state.c = '^';
+                        state += 1;
+                        break;
+                    case 2:
+                        my_state.c = '>';
+                        state += 1;
+                        break;
+                    case 3:
+                        my_state.c = 'v';
+                        state += 1;
+                        break;
+                    case 4:
+                        my_state.c = '<';
+                        state += 1;
+                        break;
+                    default:
+                        state = 0;
+                }
+            }
+        }
     }
     else
     {
@@ -197,14 +263,30 @@ char_state_t monster::update_state( const ui_t user_input,
     return my_state;
 }
 
-bool monster::get_display_info(info_window_t **pp_iw, std::string &message)
+void monster::get_display_info(std::vector<info_window_t> &info_window_list)
 {
-    *pp_iw = (info_window_t *)&debug2;
-    oss.clear();
-    message = oss.str();
-    oss.str("");
+    std::stringstream score_string;
+    score_string << "Score: " << score;
+    info_window_t score_message = {
+                                    .row_start = 0,
+                                    .col_start = 0,
+                                    .width     = 40,
+                                    .height    = 1,
+                                    .message   = score_string.str()
+                                  };
+    std::stringstream state_string;
+    state_string << "state: " << state;
+    info_window_t debug_message = {
+                                    .row_start = 25,
+                                    .col_start = 0,
+                                    .width     = 40,
+                                    .height    = 1,
+                                    .message   = state_string.str()
+                                  };
     if(my_state.id == EATER_ID)
-        return true;
-    return false;
+    {
+        info_window_list.push_back(score_message);
+        info_window_list.push_back(debug_message);
+    }
 }
 

@@ -11,29 +11,18 @@
 #include "graphics.h"
 
 
-void update_info_display(void *p_object, char type, graphics *p_graphics)
+void update_info_display(std::vector<info_window_t> &info_window_list, graphics *p_graphics)
 {
-    info_window_t *p_iw = NULL;
-    std::string message;
-    bool update = false;
+        std::vector<info_window_t>::iterator it;
+        for (it = info_window_list.begin(); it != info_window_list.end(); ++it)
+        {
+            info_window_t info_window = *it;
+            p_graphics->write(  info_window.row_start, info_window.col_start, 
+                                info_window.width,     info_window.height, 
+                                info_window.message);
+        }
 
-    switch( type )
-    {
-        case 'c':
-            update = ((character *)p_object)->get_display_info(&p_iw, message);
-            break;
-        case 'w':
-            update = ((world *)p_object)->get_display_info(&p_iw, message);
-            break;
-        default:
-            return;
-    }
-
-    if(update)
-    {
-        p_graphics->write(  p_iw->row_start, p_iw->col_start, 
-                            p_iw->width, p_iw->height, message);
-    }
+        info_window_list.clear();
 }
 
 error_code_t SimpleGame::game_loop(void)
@@ -41,6 +30,7 @@ error_code_t SimpleGame::game_loop(void)
     if((p_user_world == NULL) || (p_graphics == NULL))
         return ERROR_NULL_PTR;
 
+    std::vector<info_window_t> info_window_list;
     for(bool running=true; running; )
     {
         ui_t ui;
@@ -60,9 +50,10 @@ error_code_t SimpleGame::game_loop(void)
             bool changed = update_display(char_state, new_char_state);
             if(changed == true)
                 p_user_world->update_state(new_char_state);
-            update_info_display(p_base, 'c', p_graphics);
+            p_base->get_display_info(info_window_list);
         }
-        update_info_display(p_user_world, 'w', p_graphics);
+        p_user_world->get_display_info(info_window_list);
+        update_info_display(info_window_list, p_graphics);
 
         if(ui == UI_EXIT)
             running = false;
@@ -126,10 +117,12 @@ error_code_t SimpleGame::start_game(void)
     std::string background;
     int rows;
     int cols;
+    int row_start;
+    int col_start;
 
-    p_user_world->get_world(background, rows, cols);
+    p_user_world->get_world(background, row_start, col_start, rows, cols);
     p_graphics = new graphics(rows, cols);
-    p_graphics->write(background);
+    p_graphics->write(row_start, col_start, background);
     {
         std::vector<character *>::iterator it;
         for (it = characters.begin(); it != characters.end(); ++it)
