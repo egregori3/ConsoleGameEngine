@@ -84,12 +84,6 @@ typedef enum
     UI_EXIT
 }   ui_t;
 
-typedef enum
-{
-    ERROR_NONE,
-    ERROR_NULL_PTR,
-    ERROR_INIT
-}   error_code_t;
 
 /**
  * https://www.guru99.com/cpp-structures.html
@@ -118,7 +112,8 @@ typedef struct
     int         height;
     // https://www.cplusplus.com/reference/sstream/ostringstream/str/
     std::string message; 
-} info_window_t;
+} info_window_message_t;
+
 
 typedef struct
 {
@@ -129,7 +124,8 @@ typedef struct
     int  replace;   // character to put into old position
     bool display;   // set to true to display the character
     bool game_over; // set to end the game
-} char_state_t;
+} char_message_t;
+
 
 typedef struct
 {
@@ -142,7 +138,7 @@ typedef struct
     int bl;  // bottom left
     int bc;  // bottom center
     int br;  // bottom right
-} world_state_t;
+} world_message_t;
 
 
 /**
@@ -172,9 +168,10 @@ class character
 {
     public: // 
         // pure virtual function (ZC8.4)
-        virtual char_state_t get_state(void) = 0;
-        virtual char_state_t update_state( const ui_t user_input, 
-                                           const world_state_t world_state) = 0;
+        virtual void get_message(char_message_t &char_message) = 0;
+        virtual void update(char_message_t &char_message,
+                            const ui_t user_input, 
+                            const world_message_t &world_message) = 0;
         virtual void get_display_info(std::vector<info_window_t> &info_window_list) = 0;
 };
 
@@ -212,10 +209,12 @@ class world
 {
     public:
         // pure virtual function (ZC8.4)
-        virtual error_code_t get_world( std::string &background, 
+        virtual void get_world(std::string &background, 
                                int &row_start, int &col_start, int &rows, int &cols) = 0;
-        virtual const world_state_t get_state(const char_state_t char_state) = 0; 
-        virtual error_code_t update_state(const char_state_t char_state) = 0;
+        virtual void get_message(int row, int col, 
+                                 world_message_t &world_message) = 0; 
+        virtual void update(const char_message_t &char_message,
+                            world_message_t &world_message) = 0;
         virtual void get_display_info(std::vector<info_window_t> &info_window_list) = 0;
 };
 

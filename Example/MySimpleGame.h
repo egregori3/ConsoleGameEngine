@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <random>
 #include "interfaces.h"
 #include "SimpleGame.h"
 
@@ -55,20 +56,29 @@
 #define EATER_ID          0
 #define GHOST_ID          10
 
+typedef struct
+{
+    bool inc_score;
+    bool die;
+} eater_state_t;
+
+
 // https://www.cs.bu.edu/fac/gkollios/cs113/Slides/lect13.pdf
 class eater_world : public world
 {
     private:
         // https://www.cplusplus.com/reference/sstream/ostringstream/str/
         std::ostringstream oss; 
+        std::string arena_cpy;
 
     public:
         eater_world();
 
-        error_code_t get_world(std::string &background,
-                int &row_start, int &col_start, int &rows, int &cols);
-        const world_state_t get_state(const char_state_t char_state);
-        error_code_t update_state(const char_state_t char_state);
+        void get_world(std::string &background,
+                       int &row_start, int &col_start, int &rows, int &cols);
+        void get_message(int row, int col, world_message_t &world_message);
+        void update(const char_message_t &char_message,
+                    world_message_t &world_message);
         void get_display_info(std::vector<info_window_t> &info_window_list);
 };
 
@@ -85,22 +95,31 @@ class eater_world : public world
 class monster : public character
 {
     private:
-        char_state_t my_state;
-        int iterations;
+        int  id;        // id of character - the user can use for whatever they want
+        int  row;       // row position of character
+        int  col;       // col position of character
+        int  c;         // character to display
+        int  iterations;
+        int  score;
+        int  state;
         // https://www.cplusplus.com/reference/sstream/ostringstream/str/
         std::ostringstream oss; 
-        int score;
-        int state;
+        std::random_device rd;
+        std::default_random_engine eng;
+        std::uniform_real_distribution<float> distr;
 
     private:
-        void update_eater( const ui_t user_input, const world_state_t world_state);
-        void update_monster( const world_state_t world_state);
- 
+        void update_eater(const ui_t user_input, const world_state_t world_state);
+        void update_monster(const world_state_t world_state);
+        bool eater_test(int input, eater_state_t &ret);
+        bool monster_test(int input );
+
     public:
-        monster(char_state_t initial_state);
-        char_state_t get_state(void);
-        char_state_t update_state( const ui_t user_input, 
-                                   const world_state_t world_state);
+        monster(int id, int row, int col, int c);
+        void get_message(char_message_t &char_message);
+        void update(char_message_t &char_message,
+                    const ui_t user_input, 
+                    const world_message_t &world_message);
         void get_display_info(std::vector<info_window_t> &info_window_list);
 };
 

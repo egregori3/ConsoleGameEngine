@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <random>
 #include "interfaces.h"
 #include "SimpleGame.h"
 #include "MySimpleGame.h"
@@ -51,12 +52,6 @@
  *  @see https://www.cs.bu.edu/                                               *
  ******************************************************************************/
 
-typedef struct
-{
-    bool inc_score;
-    bool die;
-} eater_state_t;
-
 
 const int wrows = 21;
 const int wcols = 40;
@@ -95,44 +90,51 @@ const info_window_t debug2 = {25,0,40,1};
 // https://www.cs.bu.edu/fac/gkollios/cs113/Slides/lect13.pdf
 eater_world::eater_world()
 {
+    arena_cpy.assign(arena);
 }
 
-error_code_t eater_world::get_world(std::string &background, 
-        int &row_start, int &col_start, int &rows, int &cols)
+
+void eater_world::get_world(std::string &background, 
+                            int &row_start, int &col_start, int &rows, int &cols)
 {
    background = arena;
    rows       = wrows;
    cols       = wcols;
    row_start  = wrow_start;
    col_start  = wcol_start;
-
-   return ERROR_NONE;
 }
 
-const world_state_t eater_world::get_state(const char_state_t char_state)
+
+void eater_world::get_message(int row, int col, world_message_t &wm)
 {
-    world_state_t ws;
-    int row = char_state.row - wrow_start;
-    int col = char_state.col - wcol_start;
+    if((row >= (row_start+wrows)) || ((col >= (col_start+wcols)
+        || (row < row_start) || (col < col_start))
+        throw "eater_world::get_message value error";
 
-    ws.c  = arena[row*wrows+col];
-    ws.tl = arena[(row-1)*wcols+(col-1)];
-    ws.tc = arena[(row-1)*wcols+(col+0)];
-    ws.tr = arena[(row-1)*wcols+(col+1)];
+    wm.c  = arena[row*wcols+col];
+    wm.tl = arena[(row-1)*wcols+(col-1)];
+    wm.tc = arena[(row-1)*wcols+(col+0)];
+    wm.tr = arena[(row-1)*wcols+(col+1)];
 
-    ws.cr = arena[(row-0)*wcols+(col+1)];
-    ws.cl = arena[(row+0)*wcols+(col-1)];
+    wm.cr = arena[(row-0)*wcols+(col+1)];
+    wm.cl = arena[(row+0)*wcols+(col-1)];
 
-    ws.br = arena[(row+1)*wcols+(col+1)];
-    ws.bc = arena[(row+1)*wcols+(col+0)];
-    ws.bl = arena[(row+1)*wcols+(col-1)];
-
-    return ws;
+    wm.br = arena[(row+1)*wcols+(col+1)];
+    wm.bc = arena[(row+1)*wcols+(col+0)];
+    wm.bl = arena[(row+1)*wcols+(col-1)];
 }
 
-error_code_t eater_world::update_state(const char_state_t char_state)
+
+void eater_world::update(const char_message_t &char_message,
+                         world_message_t &world_message)
 {
-        return ERROR_NONE;
+    int row = char_message.row - wrow_start;
+    int col = char_message.col - wcol_start;
+    int idx = (row*wcols+col);
+
+    arena_cpy[idx] = char_state.replace;
+
+    return ERROR_NONE;
 }
 
 void eater_world::get_display_info(std::vector<info_window_t> &info_window_list)
@@ -144,6 +146,8 @@ void eater_world::get_display_info(std::vector<info_window_t> &info_window_list)
 
 monster::monster(char_state_t initial_state)
 {
+    eng        = std::default_random_engine(rd());
+    distr      = std::uniform_real_distribution<float>(0.0, 1.0);
     my_state   = initial_state;
     iterations = 0;
     score      = 0;
@@ -156,20 +160,22 @@ char_state_t monster::get_state(void)
     return my_state;
 }
 
-bool eater_test(int input, eater_state_t &retdata)
+bool monster::eater_test(int input, eater_state_t &retdata)
 {
     bool move = false;
-    if(input == ' ') 
-        move = true;
-    if(input == '*')
+    switch(input)
     {
-        retdata.inc_score = true;
-        move = true;
-    }
-    if(input == 'H')
-    {
-        retdata.die = true;
-        move = false;
+        case ' ':
+            move = true;
+            break;
+        case '*':
+            retdata.inc_score = true;
+            move = true;
+            break;
+        case 'H':
+            retdata.die = true;
+            move = false;
+            break;
     }
     return move;
 }
@@ -209,11 +215,33 @@ void monster::update_eater( const ui_t user_input, const world_state_t ws)
 
 }
 
-void monster::update_monster( const world_state_t world_state)
+bool monster::monster_test(int input)
 {
-    if((iterations % 20) == 0)
+    bool move = false;
+    switch(input)
     {
+        case ' ':
+            move = true;
+            my_state.replace = ' ';
+            break;
+        case '*':
+            move = true;
+            my_state.replace = '*';
+            break;
     }
+    return move;
+}
+
+void monster::update_monster( const world_state_t ws)
+{
+        if((monster_test(ws.tc) == true) && (distr(eng) > 0.5))
+            my_state.row = my_state.row - 1;
+        if((monster_test(ws.bc) == true) && (distr(eng) > 0.5))
+            my_state.row = my_state.row + 1;
+        if((monster_test(ws.cl) == true) && (distr(eng) > 0.5))
+            my_state.col = my_state.col - 1;
+        if((monster_test(ws.cr) == true) && (distr(eng) > 0.5))
+            my_state.col = my_state.col + 1;
 }
 
 char_state_t monster::update_state( const ui_t user_input, 
@@ -227,7 +255,7 @@ char_state_t monster::update_state( const ui_t user_input,
         }
         else
         {
-            if(iterations%10)
+            if(!(iterations % 8))
             {
                 switch(state)
                 {
@@ -255,7 +283,10 @@ char_state_t monster::update_state( const ui_t user_input,
     }
     else
     {
-        update_monster( world_state );
+        if(!(iterations % 16))
+        {
+            update_monster( world_state );
+        }
     }
 
     iterations++;
