@@ -76,10 +76,9 @@ class eater_world : public world
 
         void get_world(std::string &background,
                        int &row_start, int &col_start, int &rows, int &cols);
-        void get_message(int row, int col, world_message_t &world_message);
-        void update(const char_message_t &char_message,
-                    world_message_t &world_message);
-        void get_display_info(std::vector<info_window_t> &info_window_list);
+        void tx_message_to_engine(int row, int col, world_message_t &world_message);
+        void update_message_from_engine(const char_message_t &char_message);
+        void get_display_info(std::vector<info_window_message_t> &info_window_list);
 };
 
 /**
@@ -102,6 +101,11 @@ class monster : public character
         int  iterations;
         int  score;
         int  state;
+        int  replace;   // character to put into old position
+        bool display;   // set to true to display the character
+        bool game_over; // set to end the game
+        bool inc_score;
+        bool die;
         // https://www.cplusplus.com/reference/sstream/ostringstream/str/
         std::ostringstream oss; 
         std::random_device rd;
@@ -109,18 +113,19 @@ class monster : public character
         std::uniform_real_distribution<float> distr;
 
     private:
-        void update_eater(const ui_t user_input, const world_state_t world_state);
-        void update_monster(const world_state_t world_state);
-        bool eater_test(int input, eater_state_t &ret);
-        bool monster_test(int input );
+        void update_eater(const ui_message_t user_input, 
+                          const world_message_t world_message,  bool &update);
+        void update_monster(const world_message_t world_message,bool &update);
+        bool eater_test(const int user_input);
+        bool monster_test(const int user_input);
 
     public:
-        monster(int id, int row, int col, int c);
-        void get_message(char_message_t &char_message);
-        void update(char_message_t &char_message,
-                    const ui_t user_input, 
-                    const world_message_t &world_message);
-        void get_display_info(std::vector<info_window_t> &info_window_list);
+        monster(int id, int row, int col, int c, bool display);
+        void message_to_engine(char_message_t &char_message);
+        void update_message_from_engine(const ui_message_t &user_input_message, 
+                                        const world_message_t &world_message,
+                                        bool &updated);
+        void get_display_info(std::vector<info_window_message_t> &info_window_list);
 };
 
 

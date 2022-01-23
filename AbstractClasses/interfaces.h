@@ -82,7 +82,7 @@ typedef enum
     UI_LEFT,
     UI_RIGHT,
     UI_EXIT
-}   ui_t;
+}   ui_message_t;
 
 
 /**
@@ -168,11 +168,11 @@ class character
 {
     public: // 
         // pure virtual function (ZC8.4)
-        virtual void get_message(char_message_t &char_message) = 0;
-        virtual void update(char_message_t &char_message,
-                            const ui_t user_input, 
-                            const world_message_t &world_message) = 0;
-        virtual void get_display_info(std::vector<info_window_t> &info_window_list) = 0;
+        virtual void message_to_engine(char_message_t &char_message) = 0;
+        virtual void update_message_from_engine(const ui_message_t &user_input_message, 
+                                                const world_message_t &world_message,
+                                                bool &updated) = 0;
+        virtual void get_display_info(std::vector<info_window_message_t> &info_window_list) = 0;
 };
 
 
@@ -211,11 +211,10 @@ class world
         // pure virtual function (ZC8.4)
         virtual void get_world(std::string &background, 
                                int &row_start, int &col_start, int &rows, int &cols) = 0;
-        virtual void get_message(int row, int col, 
-                                 world_message_t &world_message) = 0; 
-        virtual void update(const char_message_t &char_message,
-                            world_message_t &world_message) = 0;
-        virtual void get_display_info(std::vector<info_window_t> &info_window_list) = 0;
+        virtual void tx_message_to_engine(int row, int col, 
+                                          world_message_t &world_message) = 0; 
+        virtual void update_message_from_engine(const char_message_t &char_message) = 0;
+        virtual void get_display_info(std::vector<info_window_message_t> &info_window_list) = 0;
 };
 
 #endif

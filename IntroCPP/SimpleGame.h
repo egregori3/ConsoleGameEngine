@@ -105,16 +105,14 @@ class SimpleGame
         int loop_rate_in_ms;
 
     private:
-        ui_t         get_user_input(void);
-        bool         update_display(char_state_t old, char_state_t news);
-        error_code_t game_loop(void);
-        void         update_constraint_display(int row, int col);
+        ui_message_t get_user_input(void);
+        void game_loop(void);
 
     public:
         SimpleGame( world *p_world, int loop_rate);
         ~SimpleGame();
-        error_code_t add_character(character *p_user_char);
-        error_code_t start_game(void);
+        void add_character(character *p_user_char);
+        void start_game(void);
 };
 
 #endif

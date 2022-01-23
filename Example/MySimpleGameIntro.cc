@@ -57,9 +57,8 @@ extern std::string arena;
 // Game hyper-parameters
 const int  loop_rate_ms = 10;
 const int  ghosts = 5;
-const char ghost = 'H'; // Initial "graphic" - can be overrriden by your derived class
-const char eater = '>';
-const char replace = ' ';
+const int  ghost = 'H'; // Initial "graphic" - can be overrriden by your derived class
+const int  eater = '>';
 const int  eater_row_init = 16;
 const int  eater_col_init = 19;
 const int  ghost_row_init = 12;
@@ -85,8 +84,6 @@ int main()
     eater_world *p_world = new eater_world();
 
     {
-        error_code_t init_error = ERROR_NONE;
-
         std::cout << "Instantiating SimpleGlame" << std::endl;
         SimpleGame sg(p_world, loop_rate_ms);
 
@@ -98,42 +95,25 @@ int main()
         //                \/ Create a new monster object in memory
         //                             \/ Pass the monster custructor a char_state_t structure
         //                                       \/ C trick for structure init
-        p_monsters[0] = new monster((char_state_t){EATER_ID,eater_row_init,eater_col_init,
-                eater,replace,true});
-        p_monsters[1] = new monster((char_state_t){GHOST_ID,ghost_row_init,ghost_col_init,
-                ghost,replace,true});
-        p_monsters[2] = new monster((char_state_t){GHOST_ID+1,ghost_row_init,ghost_col_init+1,
-                ghost,replace,true});
-        p_monsters[3] = new monster((char_state_t){GHOST_ID+2,ghost_row_init,ghost_col_init+2,
-                ghost,replace,true});
-        p_monsters[4] = new monster((char_state_t){GHOST_ID+3,ghost_row_init,ghost_col_init+3,
-                ghost,replace,true});
-        p_monsters[5] = new monster((char_state_t){GHOST_ID+4,ghost_row_init,ghost_col_init+4,
-                ghost,replace,true});
+        p_monsters[0] = new monster(EATER_ID,  eater_row_init,eater_col_init,  eater,true);
+        p_monsters[1] = new monster(GHOST_ID,  ghost_row_init,ghost_col_init,  ghost,true);
+        p_monsters[2] = new monster(GHOST_ID+1,ghost_row_init,ghost_col_init+1,ghost,true);
+        p_monsters[3] = new monster(GHOST_ID+2,ghost_row_init,ghost_col_init+2,ghost,true);
+        p_monsters[4] = new monster(GHOST_ID+3,ghost_row_init,ghost_col_init+3,ghost,true);
+        p_monsters[5] = new monster(GHOST_ID+4,ghost_row_init,ghost_col_init+4,ghost,true);
 
         // Add each character to the SimpleGame object
         for(int ii=0; ii<(ghosts+1); ii++)
         {
-            char_state_t cs = p_monsters[ii]->get_state();
-            std::cout << "Adding character to SimpleGame " << "id: " << cs.id << std::endl;
-            init_error = sg.add_character(p_monsters[ii]);
-            if(init_error != ERROR_NONE)
-            {
-                std::cout << "Error adding character" << std::endl;
-                break;
-            }
+            char_message_t char_message;
+            p_monsters[ii]->message_to_engine(char_message);
+            std::cout << "Adding character to SimpleGame " << "id: " << char_message.id << std::endl;
+            sg.add_character(p_monsters[ii]);
         }
 
-        if(init_error == ERROR_NONE)
-        {
-            std::cout << "START GAME" << std::endl;
-            sg.start_game(); // This method will not return until the game is over.
-            std::cout << "GAME OVER" << std::endl;
-        }
-        else
-        {
-            std::cout << "Initialization failed" << std::endl;
-        }
+        std::cout << "START GAME" << std::endl;
+        sg.start_game(); // This method will not return until the game is over.
+        std::cout << "GAME OVER" << std::endl;
     }
 
     // When the code gets here, the game is over.

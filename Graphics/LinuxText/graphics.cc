@@ -104,9 +104,9 @@ int graphics::write(int row, int col, int c)
     return 0;
 }
 
-ui_t graphics::get_input(void)
+ui_message_t graphics::get_input(void)
 {
-    ui_t output = UI_NONE;
+    ui_message_t output = UI_NONE;
     int ch = getch();
 
     switch(ch)

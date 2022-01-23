@@ -11,12 +11,12 @@
 #include "graphics.h"
 
 
-void update_info_display(std::vector<info_window_t> &info_window_list, graphics *p_graphics)
+void update_info_display(std::vector<info_window_message_t> &info_window_list, graphics *p_graphics)
 {
-        std::vector<info_window_t>::iterator it;
+        std::vector<info_window_message_t>::iterator it;
         for (it = info_window_list.begin(); it != info_window_list.end(); ++it)
         {
-            info_window_t info_window = *it;
+            info_window_message_t info_window = *it;
             p_graphics->write(  info_window.row_start, info_window.col_start, 
                                 info_window.width,     info_window.height, 
                                 info_window.message);
@@ -25,16 +25,14 @@ void update_info_display(std::vector<info_window_t> &info_window_list, graphics 
         info_window_list.clear();
 }
 
-error_code_t SimpleGame::game_loop(void)
+void SimpleGame::game_loop(void)
 {
     if((p_user_world == NULL) || (p_graphics == NULL))
-        return ERROR_NULL_PTR;
+        throw "SimpleGame::game_loop NULL pointer";
 
-    std::vector<info_window_t> info_window_list;
+    std::vector<info_window_message_t> info_window_list;
     for(bool running=true; running; )
     {
-        ui_t ui;
-
         // https://limbioliong.wordpress.com/2012/12/25/storing-c-objects-in-a-stl-vector-part-2/
         // https://www.oreilly.com/library/view/c-cookbook/0596007612/ch06s05.html
         // https://www.dreamincode.net/forums/topic/63358-store-class-objects-in-vector/
@@ -43,67 +41,63 @@ error_code_t SimpleGame::game_loop(void)
         for (it = characters.begin(); it != characters.end(); ++it)
         {
             character *p_base = *it;
-            char_state_t char_state     = p_base->get_state();
-            world_state_t world_state   = p_user_world->get_state(char_state);
-            ui                          = get_user_input();
-            char_state_t new_char_state = p_base->update_state(ui, world_state);
-            bool changed = update_display(char_state, new_char_state);
-            if(changed == true)
-                p_user_world->update_state(new_char_state);
+            char_message_t  char_message;
+            world_message_t world_message;
+            bool updated;
+
+            p_base->message_to_engine(char_message); // fill out char_message
+            p_user_world->tx_message_to_engine(char_message.row, char_message.col,world_message);
+            const ui_message_t ui = get_user_input();
+            if(ui == UI_EXIT)
+                running = false;
+
+            p_base->update_message_from_engine(ui, world_message, updated); // send message to characer
+            if(updated)
+            {
+                char_message_t new_char_message; // Get updated message from character
+                p_base->message_to_engine(new_char_message); // fill out char_message
+                p_user_world->update_message_from_engine((const char_message_t)new_char_message);
+                p_graphics->write(new_char_message.row, new_char_message.col, new_char_message.c);
+                p_graphics->refresh();
+            }
             p_base->get_display_info(info_window_list);
         }
         p_user_world->get_display_info(info_window_list);
         update_info_display(info_window_list, p_graphics);
 
-        if(ui == UI_EXIT)
-            running = false;
 
         usleep(loop_rate_in_ms*1000);
     }
-
-    return ERROR_NONE;
 }
 
-ui_t SimpleGame::get_user_input(void)
+ui_message_t SimpleGame::get_user_input(void)
 {
-    ui_t result = UI_NONE;
+    ui_message_t result = UI_NONE;
 //    std::cout << "SimpleGame: get_user_input" << std::endl;
     result = p_graphics->get_input();
     return result;
 }
 
-bool SimpleGame::update_display(char_state_t old, char_state_t news)
-{
-    bool changed = ((old.row != news.row) || (old.col != news.col) || (old.c != news.c));
 
-    if(changed == true)
-    {
-        p_graphics->write(old.row,  old.col,  news.replace);
-        p_graphics->write(news.row, news.col, news.c);
-        p_graphics->refresh();
-    }
-
-    return ERROR_NONE;
-}
-
-error_code_t SimpleGame::add_character(character *p_user_char)
+void SimpleGame::add_character(character *p_user_char)
 {
     // https://www.oreilly.com/library/view/c-cookbook/0596007612/ch06s05.html
 
-    char_state_t new_char = p_user_char->get_state();
+    char_message_t new_char;
+    p_user_char->message_to_engine(new_char);
     {
         // If the character ID is already registered, return error
         std::vector<character *>::iterator it;
         for (it = characters.begin(); it != characters.end(); ++it)
         {
             character *p_base = *it;
-            char_state_t old_char = p_base->get_state();
+            char_message_t old_char;
+            p_base->message_to_engine(old_char);
             if(new_char.id == old_char.id)
-                return ERROR_INIT;
+                throw "SimpleGame::add_character duplicate id's";
         }
     }
     characters.push_back(p_user_char);
-    return ERROR_NONE;
 }
 
 SimpleGame::SimpleGame(world *p_world, int loop_rate)
@@ -112,7 +106,7 @@ SimpleGame::SimpleGame(world *p_world, int loop_rate)
     loop_rate_in_ms = loop_rate;
 }
 
-error_code_t SimpleGame::start_game(void)
+void SimpleGame::start_game(void)
 {
     std::string background;
     int rows;
@@ -128,13 +122,13 @@ error_code_t SimpleGame::start_game(void)
         for (it = characters.begin(); it != characters.end(); ++it)
         {
             character *p_base = *it;
-            char_state_t init = p_base->get_state();
+            char_message_t init;
+            p_base->message_to_engine(init);
             if(init.display == true)
                 p_graphics->write(init.row, init.col, init.c);
         }
     }
-    error_code_t result = game_loop();
-    return result;
+    game_loop();
 }
 
 SimpleGame::~SimpleGame()
