@@ -67,7 +67,7 @@
 #include <sstream>
 #include <vector>
 
-//#define DISABLE_GRAPHICS // if DISABLE_GRAPHICS is defined, graphics are disabled
+// #define DISABLE_GRAPHICS // if DISABLE_GRAPHICS is defined, graphics are disabled
 
 /**
  * https://en.cppreference.com/w/cpp/language/enum
@@ -173,6 +173,7 @@ class character
                                                 const world_message_t &world_message,
                                                 bool &updated) = 0;
         virtual void get_display_info(std::vector<info_window_message_t> &info_window_list) = 0;
+        virtual void collision_message_from_engine(char_message_t &char_message, int id) = 0;
 };
 
 

@@ -83,6 +83,7 @@ int main()
     std::cout << "Instantiating eater_world" << std::endl;
     eater_world *p_world = new eater_world();
 
+    try
     {
         std::cout << "Instantiating SimpleGlame" << std::endl;
         SimpleGame sg(p_world, loop_rate_ms);
@@ -112,9 +113,22 @@ int main()
         }
 
         std::cout << "START GAME" << std::endl;
-        sg.start_game(); // This method will not return until the game is over.
+        try
+        {
+            sg.start_game(); // This method will not return until the game is over.
+        }
+        catch (const char* msg)
+        {
+            sg.~SimpleGame();
+            std::cout << msg << std::endl;
+        }
         std::cout << "GAME OVER" << std::endl;
     }
+    catch (const char* msg)
+    {
+        std::cout << msg << std::endl;
+    }
+
 
     // When the code gets here, the game is over.
     delete p_world;

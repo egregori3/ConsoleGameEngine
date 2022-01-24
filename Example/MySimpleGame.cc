@@ -4,6 +4,7 @@
 #include <memory>
 #include <sstream>
 #include <random>
+#include <unistd.h>
 #include "interfaces.h"
 #include "SimpleGame.h"
 #include "MySimpleGame.h"
@@ -115,17 +116,17 @@ void eater_world::tx_message_to_engine(int lrow, int lcol, world_message_t &wm)
     int col = lcol - wcol_start;
 
     // Fill out message
-    wm.c  = arena[row*wcols+col];
-    wm.tl = arena[(row-1)*wcols+(col-1)];
-    wm.tc = arena[(row-1)*wcols+(col+0)];
-    wm.tr = arena[(row-1)*wcols+(col+1)];
+    wm.c  = arena_cpy[row*wcols+col];
+    wm.tl = arena_cpy[(row-1)*wcols+(col-1)];
+    wm.tc = arena_cpy[(row-1)*wcols+(col+0)];
+    wm.tr = arena_cpy[(row-1)*wcols+(col+1)];
 
-    wm.cr = arena[(row-0)*wcols+(col+1)];
-    wm.cl = arena[(row+0)*wcols+(col-1)];
+    wm.cr = arena_cpy[(row-0)*wcols+(col+1)];
+    wm.cl = arena_cpy[(row+0)*wcols+(col-1)];
 
-    wm.br = arena[(row+1)*wcols+(col+1)];
-    wm.bc = arena[(row+1)*wcols+(col+0)];
-    wm.bl = arena[(row+1)*wcols+(col-1)];
+    wm.br = arena_cpy[(row+1)*wcols+(col+1)];
+    wm.bc = arena_cpy[(row+1)*wcols+(col+0)];
+    wm.bl = arena_cpy[(row+1)*wcols+(col-1)];
 }
 
 
@@ -135,7 +136,8 @@ void eater_world::update_message_from_engine(const char_message_t &char_message)
     int col = char_message.col - wcol_start;
     int idx = (row*wcols+col);
 
-    arena_cpy[idx] = char_message.replace;
+    if(char_message.replace > 0)
+        arena_cpy[idx] = char_message.replace;
 }
 
 
@@ -160,6 +162,7 @@ monster::monster(int lid, int lrow, int lcol, int lc, bool ldisplay)
     replace    = 0;
     game_over  = false;
     display    = ldisplay;
+    old_motion = 0;
 }
 
 
@@ -180,6 +183,7 @@ void monster::message_to_engine(char_message_t &char_message)
 bool monster::eater_test(const int input)
 {
     bool move = false;
+    replace = ' ';
     switch(input)
     {
         case ' ':
@@ -188,10 +192,6 @@ bool monster::eater_test(const int input)
         case '*':
             inc_score = true;
             move = true;
-            break;
-        case 'H':
-            die = true;
-            move = false;
             break;
     }
     return move;
@@ -210,32 +210,37 @@ void monster::update_eater( const ui_message_t user_input, const world_message_t
     {
         row = row - 1;
         update = true;
+        c = 'v';
     }
 
     if((user_input == UI_DOWN) && (eater_test(ws.bc)))
     {
         row = row + 1;
         update = true;
+        c = '^';
     }
 
     if((user_input == UI_LEFT) && (eater_test(ws.cl)))
     {
         col = col - 1;
         update = true;
+        c = '>';
     }
 
     if((user_input == UI_RIGHT) && (eater_test(ws.cr)))
     {
         col = col + 1;
         update = true;
+        c = '<';
     }
 
     if(inc_score == true)
     {
         score++;
+        inc_score = false;
     }
 
-    if(die == true)
+    if((die == true) && (state == 0))
     {
         state = 1;
     }
@@ -245,15 +250,14 @@ void monster::update_eater( const ui_message_t user_input, const world_message_t
 bool monster::monster_test(const int input)
 {
     bool move = false;
+    replace = 0;
     switch(input)
     {
         case ' ':
             move = true;
-            replace = ' ';
             break;
         case '*':
             move = true;
-            replace = '*';
             break;
     }
     return move;
@@ -261,26 +265,35 @@ bool monster::monster_test(const int input)
 
 void monster::update_monster(const world_message_t ws, bool &update)
 {
-        if((monster_test(ws.tc) == true) && (distr(eng) > 0.5))
+    for(update = false; update == false; usleep(10*1000))
+    {
+        if((monster_test(ws.tc) == true) && ((old_motion == 1) || (distr(eng) > 0.5)))
         {
             row = row - 1;
             update = true;
+            old_motion = 1;
         }
-        if((monster_test(ws.bc) == true) && (distr(eng) > 0.5))
+        if((monster_test(ws.bc) == true) && ((old_motion == 2) || (distr(eng) > 0.5)))
         {
             row = row + 1;
             update = true;
+            old_motion = 2;
         }
-        if((monster_test(ws.cl) == true) && (distr(eng) > 0.5))
+        if((monster_test(ws.cl) == true) && ((old_motion == 3) || (distr(eng) > 0.5)))
         {
             col = col - 1;
             update = true;
+            old_motion = 3;
         }
-        if((monster_test(ws.cr) == true) && (distr(eng) > 0.5))
+        if((monster_test(ws.cr) == true) && ((old_motion == 4) || (distr(eng) > 0.5)))
         {
             col = col + 1;
             update = true;
+            old_motion = 4;
         }
+    }
+    if(update == false)
+        old_motion = 0;
 }
 
 void monster::update_message_from_engine(const ui_message_t &user_input, 
@@ -297,8 +310,9 @@ void monster::update_message_from_engine(const ui_message_t &user_input,
         }
         else
         {
-            if(!(iterations % 8))
+            if(!(iterations % 32))
             {
+                update = true;
                 switch(state)
                 {
                     case 1:
@@ -327,7 +341,7 @@ void monster::update_message_from_engine(const ui_message_t &user_input,
     {
         if(!(iterations % 16))
         {
-    //        update_monster(world_message, update);
+            update_monster(world_message, update);
         }
     }
 
@@ -347,7 +361,7 @@ void monster::get_display_info(std::vector<info_window_message_t> &info_window_l
                                     .message   = score_string.str()
                                   };
     std::stringstream state_string;
-    state_string << "state: " << state << "  row: " << row << "  col: " << col;
+    state_string << "state: " << state << "  row: " << row << "  col: " << col << "   die: " << die;
     info_window_message_t debug_message = {
                                     .row_start = 25,
                                     .col_start = 0,
@@ -362,3 +376,9 @@ void monster::get_display_info(std::vector<info_window_message_t> &info_window_l
     }
 }
 
+void monster::collision_message_from_engine(char_message_t &char_message, int id)
+{
+    die   = true;
+    if(state == 0)
+        state = 1;
+}

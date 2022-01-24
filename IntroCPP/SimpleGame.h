@@ -102,7 +102,12 @@ class SimpleGame
         std::vector<character *> characters;
         world *p_user_world  = NULL;
         graphics *p_graphics = NULL;
+        int *collision_array = NULL;
         int loop_rate_in_ms;
+        int rows;
+        int cols;
+        int row_start;
+        int col_start;
 
     private:
         ui_message_t get_user_input(void);
@@ -113,6 +118,8 @@ class SimpleGame
         ~SimpleGame();
         void add_character(character *p_user_char);
         void start_game(void);
+        void init_collision(void);
+        bool check_collision(int row, int col, int &id);
 };
 
 #endif

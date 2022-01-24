@@ -102,6 +102,7 @@ class monster : public character
         int  score;
         int  state;
         int  replace;   // character to put into old position
+        int  old_motion;
         bool display;   // set to true to display the character
         bool game_over; // set to end the game
         bool inc_score;
@@ -126,6 +127,7 @@ class monster : public character
                                         const world_message_t &world_message,
                                         bool &updated);
         void get_display_info(std::vector<info_window_message_t> &info_window_list);
+        void collision_message_from_engine(char_message_t &char_message, int id);
 };
 
 
