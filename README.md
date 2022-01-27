@@ -41,7 +41,9 @@ The advanced CPP project does the same thing as the intro project but is written
  * map containers
 
 
-About the Game "Engine"
+# About the SimpleGame class
+
+The 
 
 
 
