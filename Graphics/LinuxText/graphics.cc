@@ -92,6 +92,8 @@ int graphics::write(int row, int col, int width, int height, std::string info)
     std::cout << "(" << row << "," << col << "," << width << "," << height << ")";
     std::cout << "  info: "<< info << std::endl;
 #endif
+
+    return 0;
 }
 
 int graphics::write(int row, int col, int c)
@@ -126,6 +128,9 @@ ui_message_t graphics::get_input(void)
         case KEY_DOWN:
             output = UI_DOWN;
             break;
+
+        case 32:
+            output = UI_PAUSE;
 
         default:
             break;

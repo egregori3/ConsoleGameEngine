@@ -63,6 +63,16 @@ typedef struct
 } eater_state_t;
 
 
+typedef enum
+{
+    NONE,
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
+}   motion_t;
+
+
 // https://www.cs.bu.edu/fac/gkollios/cs113/Slides/lect13.pdf
 class eater_world : public world
 {
@@ -94,19 +104,20 @@ class eater_world : public world
 class monster : public character
 {
     private:
-        int  id;        // id of character - the user can use for whatever they want
-        int  row;       // row position of character
-        int  col;       // col position of character
-        int  c;         // character to display
-        int  iterations;
-        int  score;
-        int  state;
-        int  replace;   // character to put into old position
-        int  old_motion;
-        bool display;   // set to true to display the character
-        bool game_over; // set to end the game
-        bool inc_score;
-        bool die;
+        int         id;        // id of character - the user can use for whatever they want
+        int         row;       // row position of character
+        int         col;       // col position of character
+        int         c;         // character to display
+        int         iterations;
+        int         score;
+        int         state;
+        int         replace;   // character to put into old position
+        bool        display;   // set to true to display the character
+        bool        game_over; // set to end the game
+        bool        inc_score;
+        bool        die;
+        motion_t    old_motion;
+        std::vector<std::string> debug_message;
         // https://www.cplusplus.com/reference/sstream/ostringstream/str/
         std::ostringstream oss; 
         std::random_device rd;

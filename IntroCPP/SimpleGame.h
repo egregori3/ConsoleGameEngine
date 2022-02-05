@@ -108,6 +108,7 @@ class SimpleGame
         int cols;
         int row_start;
         int col_start;
+        bool paused = false;
 
     private:
         ui_message_t get_user_input(void);

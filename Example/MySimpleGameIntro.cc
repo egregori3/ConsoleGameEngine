@@ -55,8 +55,8 @@
 extern std::string arena;
 
 // Game hyper-parameters
-const int  loop_rate_ms = 10;
-const int  ghosts = 5;
+const int  loop_rate_ms = 20;
+const int  ghosts = 1; // 5
 const int  ghost = 'H'; // Initial "graphic" - can be overrriden by your derived class
 const int  eater = '>';
 const int  eater_row_init = 16;
@@ -77,7 +77,7 @@ int main()
     // int array[5] = {3}; will ONLY set a[0] to 3, all others will be 0
     // GCC provides a workaround for this, but it is compiler specific.
     // monster *p_monsters[6] = { NULL }; // will work, but could burn you
-    monster *p_monsters[ghosts+1] = { NULL, NULL, NULL, NULL, NULL, NULL }; // safer
+    monster *p_monsters[ghosts+1] = { NULL }; 
 
     // Instantiate your world class and pass a pointer to the object to the SimpleGame class
     std::cout << "Instantiating eater_world" << std::endl;
@@ -97,11 +97,9 @@ int main()
         //                             \/ Pass the monster custructor a char_state_t structure
         //                                       \/ C trick for structure init
         p_monsters[0] = new monster(EATER_ID,  eater_row_init,eater_col_init,  eater,true);
-        p_monsters[1] = new monster(GHOST_ID,  ghost_row_init,ghost_col_init,  ghost,true);
-        p_monsters[2] = new monster(GHOST_ID+1,ghost_row_init,ghost_col_init+1,ghost,true);
-        p_monsters[3] = new monster(GHOST_ID+2,ghost_row_init,ghost_col_init+2,ghost,true);
-        p_monsters[4] = new monster(GHOST_ID+3,ghost_row_init,ghost_col_init+3,ghost,true);
-        p_monsters[5] = new monster(GHOST_ID+4,ghost_row_init,ghost_col_init+4,ghost,true);
+
+        for(int ii=0; ii<ghosts; ii++)
+            p_monsters[ii+1] = new monster(GHOST_ID, ghost_row_init, ghost_col_init+ii, ghost, true);
 
         // Add each character to the SimpleGame object
         for(int ii=0; ii<(ghosts+1); ii++)

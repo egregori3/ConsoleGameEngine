@@ -81,7 +81,8 @@ typedef enum
     UI_DOWN,
     UI_LEFT,
     UI_RIGHT,
-    UI_EXIT
+    UI_EXIT,
+    UI_PAUSE
 }   ui_message_t;
 
 

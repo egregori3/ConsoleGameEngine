@@ -5,6 +5,7 @@
 #include <sstream>
 #include <random>
 #include <unistd.h>
+#include <set>
 #include "interfaces.h"
 #include "SimpleGame.h"
 #include "MySimpleGame.h"
@@ -88,6 +89,13 @@ const info_window_message_t score  = {0,0,40,1};
 const info_window_message_t debug1 = {25,40,40,1};
 const info_window_message_t debug2 = {25,0,40,1};
 
+
+/******************************************************************************/
+/*                                                                            */
+/*                         eater_world public methods                         */
+/*                                                                            */
+/******************************************************************************/
+
 // https://www.cs.bu.edu/fac/gkollios/cs113/Slides/lect13.pdf
 eater_world::eater_world()
 {
@@ -145,7 +153,11 @@ void eater_world::get_display_info(std::vector<info_window_message_t> &info_wind
 {
 }
 
+
 /******************************************************************************/
+/*                                                                            */
+/*                         monster public methods                             */
+/*                                                                            */
 /******************************************************************************/
 
 monster::monster(int lid, int lrow, int lcol, int lc, bool ldisplay)
@@ -162,7 +174,7 @@ monster::monster(int lid, int lrow, int lcol, int lc, bool ldisplay)
     replace    = 0;
     game_over  = false;
     display    = ldisplay;
-    old_motion = 0;
+    old_motion = NONE;
 }
 
 
@@ -179,6 +191,86 @@ void monster::message_to_engine(char_message_t &char_message)
     char_message.game_over = game_over; // set to end the game
 }
 
+
+void monster::update_message_from_engine(const ui_message_t &user_input, 
+                                         const world_message_t &world_message,
+                                         bool &updated)
+{
+    bool update = false;
+
+    if(id == EATER_ID)
+    {
+        update_eater(user_input, world_message, update);
+    }
+    else
+    {
+        update_monster(world_message, update);
+    }
+
+    iterations++;
+    updated = update;
+}
+
+
+void monster::get_display_info(std::vector<info_window_message_t> &info_window_list)
+{
+    std::stringstream score_string;
+    score_string << "Score: " << score;
+    info_window_message_t score_message = {
+                                    .row_start = 0,
+                                    .col_start = 0,
+                                    .width     = 40,
+                                    .height    = 1,
+                                    .message   = score_string.str()
+                                  };
+    std::stringstream state_string;
+    state_string << "state: " << state << "  row: " << row << "  col: " << col << "   die: " << die;
+    info_window_message_t info_message = {
+                                    .row_start = 25,
+                                    .col_start = 0,
+                                    .width     = 40,
+                                    .height    = 1,
+                                    .message   = state_string.str()
+                                  };
+    if(id == EATER_ID)
+    {
+        info_window_list.push_back(score_message);
+        info_window_list.push_back(info_message);
+    }
+    else
+    {
+        int row = 26;
+        while (!debug_message.empty())
+        {
+            std::string message_string = debug_message.back();
+            info_window_message_t message = {
+                                                .row_start = (5*(id-GHOST_ID))+row,
+                                                .col_start = 0,
+                                                .width     = 80,
+                                                .height    = 1,
+                                                .message   = message_string.c_str()
+                                            };
+            info_window_list.push_back(message);
+            debug_message.pop_back();
+            row++;
+        }
+    }
+}
+
+
+void monster::collision_message_from_engine(char_message_t &char_message, int id)
+{
+    die   = true;
+    if(state == 0)
+        state = 1;
+}
+
+
+/******************************************************************************/
+/*                                                                            */
+/*                     monster::eater private methods                         */
+/*                                                                            */
+/******************************************************************************/
 
 bool monster::eater_test(const int input)
 {
@@ -199,6 +291,36 @@ bool monster::eater_test(const int input)
 
 void monster::update_eater( const ui_message_t user_input, const world_message_t ws, bool &update)
 {
+    if(state != 0)
+    {
+        if(!(iterations % 32))
+        {
+            update = true;
+            switch(state)
+            {
+                case 1:
+                    c = '^';
+                    state += 1;
+                    break;
+                case 2:
+                    c = '>';
+                    state += 1;
+                    break;
+                case 3:
+                    c = 'v';
+                    state += 1;
+                    break;
+                case 4:
+                    c = '<';
+                    state += 1;
+                    break;
+                default:
+                    state = 0;
+            }
+        }
+
+        return;
+    }
 
 //    oss << "test: " << my_state.row << ","
 //                    << my_state.col << ","
@@ -247,6 +369,19 @@ void monster::update_eater( const ui_message_t user_input, const world_message_t
 
 }
 
+
+/******************************************************************************/
+/*                                                                            */
+/*                     monster::ghost private methods                         */
+/*                                                                            */
+/******************************************************************************/
+
+
+/*
+    Test if it is OK to move based on the ascii character (input).
+    The ghost can move into positions containing ascii characters: ' ' or '*'.
+    Setting replace to 0 tells the engine to disable background changes.
+ */
 bool monster::monster_test(const int input)
 {
     bool move = false;
@@ -263,122 +398,115 @@ bool monster::monster_test(const int input)
     return move;
 }
 
+
+std::string decode_motion(motion_t in)
+{
+    switch(in)
+    {
+        case UP:    return "up, ";
+        case DOWN:  return "down, ";
+        case LEFT:  return "left, ";
+        case RIGHT: return "right, ";
+    }
+
+    return "error, ";
+}
+
+/*
+    
+ */
 void monster::update_monster(const world_message_t ws, bool &update)
 {
-    for(update = false; update == false; usleep(10*1000))
+    std::string debug = "ID: " + std::to_string(id) + ", ";
+
+    // https://www.geeksforgeeks.org/set-find-function-in-c-stl/
+    // https://www.cplusplus.com/reference/set/set/
+    std::set<motion_t> available_motion_list;
+
+    if(iterations % 16)
     {
-        if((monster_test(ws.tc) == true) && ((old_motion == 1) || (distr(eng) > 0.5)))
+        return; // Only update the ghost's position once every 16 calls
+    }
+
+    if(monster_test(ws.tc) == true)
+    {
+        available_motion_list.insert(UP);
+        debug += "up, ";
+    }
+    if(monster_test(ws.bc) == true)
+    {
+        available_motion_list.insert(DOWN);
+        debug += "down, ";
+    }
+    if(monster_test(ws.cl) == true)
+    {
+        available_motion_list.insert(LEFT);
+        debug += "left, ";
+    }
+    if(monster_test(ws.cr) == true)
+    {
+        available_motion_list.insert(RIGHT);
+        debug += "right, ";
+    }
+
+    if(old_motion != NONE)
+    {
+        // https://www.geeksforgeeks.org/set-find-function-in-c-stl/
+        // https://www.cplusplus.com/reference/set/set/find/
+        // If we cannot find old_motion in the set, we need to find another motion
+        if(available_motion_list.find(old_motion) != available_motion_list.end())
         {
-            row = row - 1;
-            update = true;
-            old_motion = 1;
-        }
-        if((monster_test(ws.bc) == true) && ((old_motion == 2) || (distr(eng) > 0.5)))
-        {
-            row = row + 1;
-            update = true;
-            old_motion = 2;
-        }
-        if((monster_test(ws.cl) == true) && ((old_motion == 3) || (distr(eng) > 0.5)))
-        {
-            col = col - 1;
-            update = true;
-            old_motion = 3;
-        }
-        if((monster_test(ws.cr) == true) && ((old_motion == 4) || (distr(eng) > 0.5)))
-        {
-            col = col + 1;
-            update = true;
-            old_motion = 4;
+            old_motion = NONE;
         }
     }
-    if(update == false)
-        old_motion = 0;
-}
+    
 
-void monster::update_message_from_engine(const ui_message_t &user_input, 
-                                         const world_message_t &world_message,
-                                         bool &updated)
-{
-    bool update = false;
-
-    if(id == EATER_ID)
+    if(old_motion == NONE)
     {
-        if(state == 0)
+        float start_slot = 0.0;
+        float slot_size  = 1.0 / available_motion_list.size();
+        float r_slot     = distr(eng);
+        std::set<motion_t>::iterator itr;
+        for(itr = available_motion_list.begin(); itr != available_motion_list.end(); itr++)
         {
-            update_eater(user_input, world_message, update);
-        }
-        else
-        {
-            if(!(iterations % 32))
+            if((r_slot>=start_slot) && (r_slot<(start_slot + slot_size)))
             {
-                update = true;
-                switch(state)
-                {
-                    case 1:
-                        c = '^';
-                        state += 1;
-                        break;
-                    case 2:
-                        c = '>';
-                        state += 1;
-                        break;
-                    case 3:
-                        c = 'v';
-                        state += 1;
-                        break;
-                    case 4:
-                        c = '<';
-                        state += 1;
-                        break;
-                    default:
-                        state = 0;
-                }
+                old_motion = *itr;
+                break;
             }
+            start_slot += slot_size;
         }
+        debug += "new, ";
     }
-    else
+
+    debug += "[";
+    debug += decode_motion(old_motion);
+    debug += "], ";
+
+    debug += "(";
+    debug += std::to_string(row);
+    debug += ", ";
+    debug += std::to_string(col);
+    debug += ")";
+
+    update = true;
+    switch(old_motion)
     {
-        if(!(iterations % 16))
-        {
-            update_monster(world_message, update);
-        }
+        case UP:
+            row = row - 1;
+            break;
+        case DOWN:
+            row = row + 1;
+            break;
+        case LEFT:
+            col = col - 1;
+            break;
+        case RIGHT:
+            col = col + 1;
+            break;
     }
 
-    iterations++;
-    updated = update;
+    debug_message.push_back(debug);
 }
 
-void monster::get_display_info(std::vector<info_window_message_t> &info_window_list)
-{
-    std::stringstream score_string;
-    score_string << "Score: " << score;
-    info_window_message_t score_message = {
-                                    .row_start = 0,
-                                    .col_start = 0,
-                                    .width     = 40,
-                                    .height    = 1,
-                                    .message   = score_string.str()
-                                  };
-    std::stringstream state_string;
-    state_string << "state: " << state << "  row: " << row << "  col: " << col << "   die: " << die;
-    info_window_message_t debug_message = {
-                                    .row_start = 25,
-                                    .col_start = 0,
-                                    .width     = 40,
-                                    .height    = 1,
-                                    .message   = state_string.str()
-                                  };
-    if(id == EATER_ID)
-    {
-        info_window_list.push_back(score_message);
-        info_window_list.push_back(debug_message);
-    }
-}
 
-void monster::collision_message_from_engine(char_message_t &char_message, int id)
-{
-    die   = true;
-    if(state == 0)
-        state = 1;
-}

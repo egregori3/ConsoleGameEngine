@@ -78,27 +78,44 @@ void SimpleGame::game_loop(void)
         {
             character *p_base = *it;
             char_message_t  old_char_message;
+            char_message_t  new_char_message;
             world_message_t world_message;
             bool updated;
 
-            p_base->message_to_engine(old_char_message); // fill out char_message
-            p_user_world->tx_message_to_engine(old_char_message.row, 
-                                               old_char_message.col,
-                                               world_message);
-            const ui_message_t ui = get_user_input();
-            if(ui == UI_EXIT)
-                running = false;
+            {   // Get current state of the game
+                p_base->message_to_engine(old_char_message);
+                p_user_world->tx_message_to_engine(old_char_message.row, 
+                                                   old_char_message.col,
+                                                   world_message);
+            }
 
-            p_base->update_message_from_engine(ui, (const world_message_t)world_message, updated); // send message to characer
-            if(updated)
-            {
+            {   // Update character
+                ui_message_t ui = get_user_input();
+                if(ui == UI_EXIT)
+                    running = false;
+
+                if(ui == UI_PAUSE)
+                    paused = true;
+
+                p_base->update_message_from_engine((const ui_message_t)ui, 
+                        (const world_message_t)world_message, updated); // send message to characer
+            }
+
+            {   // Collision detection with updated character info
                 int id;
-                char_message_t new_char_message; // Get updated message from character
-                p_base->message_to_engine(new_char_message); // fill out char_message
+                p_base->message_to_engine(new_char_message);
                 if(check_collision(new_char_message.row, new_char_message.col, id))
                 {
                     p_base->collision_message_from_engine(new_char_message, id);
                 }
+            }
+
+            // Get display info from character
+            p_base->get_display_info(info_window_list);
+
+            // Graphics
+            if(updated && !paused)
+            {
                 p_user_world->update_message_from_engine((const char_message_t)new_char_message);
                 p_graphics->write(new_char_message.row, 
                                   new_char_message.col, 
@@ -112,14 +129,27 @@ void SimpleGame::game_loop(void)
                 }
                 p_graphics->refresh();
             }
-            p_base->get_display_info(info_window_list);
-        }
+        } // Character loop
+
         p_user_world->get_display_info(info_window_list);
         update_info_display(info_window_list, p_graphics);
 
+        // Pause
+        while(paused && running)
+        {
+            ui_message_t ui = get_user_input(); 
+            if(ui == UI_EXIT)
+                running = false;
+
+            if(ui == UI_PAUSE)
+            {
+                sleep(1);
+                paused = false;
+            }
+        }
 
         usleep(loop_rate_in_ms*1000);
-    }
+    } // Game Loop
 }
 
 ui_message_t SimpleGame::get_user_input(void)
