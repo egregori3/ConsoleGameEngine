@@ -289,6 +289,7 @@ bool monster::eater_test(const int input)
     return move;
 }
 
+// update_message_from_engine
 void monster::update_eater( const ui_message_t user_input, const world_message_t ws, bool &update)
 {
     if(state != 0)
@@ -412,9 +413,7 @@ std::string decode_motion(motion_t in)
     return "error, ";
 }
 
-/*
-    
- */
+// update_message_from_engine
 void monster::update_monster(const world_message_t ws, bool &update)
 {
     std::string debug = "ID: " + std::to_string(id) + ", ";
@@ -454,7 +453,7 @@ void monster::update_monster(const world_message_t ws, bool &update)
         // https://www.geeksforgeeks.org/set-find-function-in-c-stl/
         // https://www.cplusplus.com/reference/set/set/find/
         // If we cannot find old_motion in the set, we need to find another motion
-        if(available_motion_list.find(old_motion) != available_motion_list.end())
+        if(available_motion_list.find(old_motion) == available_motion_list.end())
         {
             old_motion = NONE;
         }

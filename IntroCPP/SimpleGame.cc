@@ -98,7 +98,7 @@ void SimpleGame::game_loop(void)
                     paused = true;
 
                 p_base->update_message_from_engine((const ui_message_t)ui, 
-                        (const world_message_t)world_message, updated); // send message to characer
+                    (const world_message_t)world_message, updated); // send message to characer
             }
 
             {   // Collision detection with updated character info
