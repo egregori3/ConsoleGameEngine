@@ -56,11 +56,27 @@
 #define EATER_ID          0
 #define GHOST_ID          10
 
-typedef struct
+#define ROW_ERROR  std::string("start_row: ") + std::to_string(wrow_start) + ", "\
+                   + "last_row: " + std::to_string(wrow_start+wrows) + ", "\
+     
+#define COL_ERROR  std::string("start_col: ") + std::to_string(wcol_start) + ", "\
+                   + "last_col: " + std::to_string(wcol_start+wcols) + ", "\
+
+typedef enum
 {
-    bool inc_score;
-    bool die;
-} eater_state_t;
+    EATING,
+    DEAD1,
+    DEAD2,
+    DEAD3,
+    DEAD4
+}   eater_state_t;
+
+
+typedef enum
+{
+    CHASE,
+    RUN
+}   ghost_state_t;
 
 
 typedef enum
@@ -86,9 +102,9 @@ class eater_world : public world
 
         void get_world(std::string &background,
                        int &row_start, int &col_start, int &rows, int &cols);
-        void tx_message_to_engine(int row, int col, world_message_t &world_message);
-        void update_message_from_engine(const char_message_t &char_message);
-        void get_display_info(std::vector<info_window_message_t> &info_window_list);
+
+        const surroundings_t get_surroundings(int row, int col);
+        const int            update(int row, int col, int c);
 };
 
 /**
@@ -104,20 +120,25 @@ class eater_world : public world
 class monster : public character
 {
     private:
-        int         id;        // id of character - the user can use for whatever they want
-        int         row;       // row position of character
-        int         col;       // col position of character
-        int         c;         // character to display
-        int         iterations;
-        int         score;
-        int         state;
-        int         replace;   // character to put into old position
-        bool        display;   // set to true to display the character
-        bool        game_over; // set to end the game
-        bool        inc_score;
-        bool        die;
-        motion_t    old_motion;
-        std::vector<std::string> debug_message;
+        // Initalized by constructor
+        int             id;        // id of character - the user can use for whatever they want
+        int             old_row;   // row position of character
+        int             old_col;   // col position of character
+        int             old_c;     // character to display
+        int             new_row;   // row position of character
+        int             new_col;   // col position of character
+        int             new_c;     // character to display
+        bool            display;   // set to true to display the character
+        motion_t        old_motion;
+
+        // Initialized here requires C++11
+        int             replace;   // character to put into old position
+        int             iterations      = 0;
+        int             score           = 0;
+        bool            game_over       = false;
+        eater_state_t   eater_state     = EATING;
+        ghost_state_t   ghost_state     = CHASE;
+        std::string     debug_message;
         // https://www.cplusplus.com/reference/sstream/ostringstream/str/
         std::ostringstream oss; 
         std::random_device rd;
@@ -125,20 +146,24 @@ class monster : public character
         std::uniform_real_distribution<float> distr;
 
     private:
-        void update_eater(const ui_message_t user_input, 
-                          const world_message_t world_message,  bool &update);
-        void update_monster(const world_message_t world_message,bool &update);
-        bool eater_test(const int user_input);
-        bool monster_test(const int user_input);
+        void update_eater(const ui_message_t &user_input, 
+                          const surroundings_t &surroundings);
+        void update_monster(const surroundings_t &surroundings);
+        bool eater_test(int user_input);
+        bool monster_test(int user_input);
+        void collision_eater(int id);
+        void collision_monster(int id);
 
     public:
         monster(int id, int row, int col, int c, bool display);
-        void message_to_engine(char_message_t &char_message);
-        void update_message_from_engine(const ui_message_t &user_input_message, 
-                                        const world_message_t &world_message,
-                                        bool &updated);
-        void get_display_info(std::vector<info_window_message_t> &info_window_list);
-        void collision_message_from_engine(char_message_t &char_message, int id);
+
+        const position_t         get_old_position(void);
+        const position_t         get_new_position(void);
+        const graphic_data_t     get_graphics(void);
+        const text_window_t      get_text(void);
+        void                     collision(int id);
+        const game_engine_data_t update( const ui_message_t &ui, 
+                                         const surroundings_t &surroundings);
 };
 
 

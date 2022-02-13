@@ -83,15 +83,16 @@ int graphics::write(int row_start, int col_start, std::string bg)
 
 int graphics::write(int row, int col, int width, int height, std::string info)
 {
-
 #ifndef DISABLE_GRAPHICS
-    for(int ii=0; ii<width; ii++)
-        mvaddch(row, col+ii, ' ');
-    mvaddstr(row, col, info.c_str());
+    std::string msg = std::string(info,0,width);
+    int str_len = msg.length();
+    mvaddstr(row, col, msg.c_str());
+    mvaddstr(row, col+str_len, std::string(width-str_len,' ').c_str());
 #else
     std::cout << "(" << row << "," << col << "," << width << "," << height << ")";
     std::cout << "  info: "<< info << std::endl;
 #endif
+    previous_debug_width = info.length();
 
     return 0;
 }

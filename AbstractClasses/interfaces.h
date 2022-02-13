@@ -67,7 +67,13 @@
 #include <sstream>
 #include <vector>
 
-// #define DISABLE_GRAPHICS // if DISABLE_GRAPHICS is defined, graphics are disabled
+
+//#define DISABLE_GRAPHICS // if DISABLE_GRAPHICS is defined, graphics are disabled
+#ifdef  DISABLE_GRAPHICS
+#define DB(X) std::cerr << "Debug >" << X << "< " << __FILE__ << " "<<  __LINE__ << "\n"
+#else
+#define DB(X)
+#endif
 
 /**
  * https://en.cppreference.com/w/cpp/language/enum
@@ -111,9 +117,8 @@ typedef struct
     int         col_start;
     int         width;
     int         height;
-    // https://www.cplusplus.com/reference/sstream/ostringstream/str/
     std::string message; 
-} info_window_message_t;
+}   text_window_t;
 
 
 typedef struct
@@ -122,10 +127,17 @@ typedef struct
     int  row;       // row position of character
     int  col;       // col position of character
     int  c;         // character to display
-    int  replace;   // character to put into old position
-    bool display;   // set to true to display the character
-    bool game_over; // set to end the game
-} char_message_t;
+}   position_t;
+
+
+typedef struct
+{
+    int         id;        // id of character - the user can use for whatever they want
+    bool        display;   // set to true to display the character
+    bool        changed;
+    position_t  old_pos;
+    position_t  new_pos;
+}   graphic_data_t;
 
 
 typedef struct
@@ -139,7 +151,18 @@ typedef struct
     int bl;  // bottom left
     int bc;  // bottom center
     int br;  // bottom right
-} world_message_t;
+}   surroundings_t;
+
+
+typedef struct
+{
+    bool        changed;
+    bool        game_over; // set to end the game
+    int         debug_row;
+    int         debug_col;
+    std::string debug_message; 
+}   game_engine_data_t;
+
 
 
 /**
@@ -169,12 +192,13 @@ class character
 {
     public: // 
         // pure virtual function (ZC8.4)
-        virtual void message_to_engine(char_message_t &char_message) = 0;
-        virtual void update_message_from_engine(const ui_message_t &user_input_message, 
-                                                const world_message_t &world_message,
-                                                bool &updated) = 0;
-        virtual void get_display_info(std::vector<info_window_message_t> &info_window_list) = 0;
-        virtual void collision_message_from_engine(char_message_t &char_message, int id) = 0;
+        virtual const position_t         get_old_position(void) = 0;
+        virtual const position_t         get_new_position(void) = 0;
+        virtual const graphic_data_t     get_graphics(void)     = 0;
+        virtual const text_window_t      get_text(void)         = 0;
+        virtual void                     collision(int id)      = 0;
+        virtual const game_engine_data_t update( const ui_message_t &ui, 
+                                                 const surroundings_t &surroundings) = 0;
 };
 
 
@@ -211,12 +235,11 @@ class world
 {
     public:
         // pure virtual function (ZC8.4)
-        virtual void get_world(std::string &background, 
-                               int &row_start, int &col_start, int &rows, int &cols) = 0;
-        virtual void tx_message_to_engine(int row, int col, 
-                                          world_message_t &world_message) = 0; 
-        virtual void update_message_from_engine(const char_message_t &char_message) = 0;
-        virtual void get_display_info(std::vector<info_window_message_t> &info_window_list) = 0;
+        virtual void                 get_world(std::string &background, 
+                                       int &row_start, int &col_start, 
+                                       int &rows, int &cols)            = 0;
+        virtual const surroundings_t get_surroundings(int row, int col) = 0;
+        virtual const int            update(int row, int col, int c)    = 0;
 };
 
 #endif

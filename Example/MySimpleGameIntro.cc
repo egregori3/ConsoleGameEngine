@@ -56,7 +56,7 @@ extern std::string arena;
 
 // Game hyper-parameters
 const int  loop_rate_ms = 20;
-const int  ghosts = 1; // 5
+const int  ghosts = 5; // 5
 const int  ghost = 'H'; // Initial "graphic" - can be overrriden by your derived class
 const int  eater = '>';
 const int  eater_row_init = 16;
@@ -86,7 +86,7 @@ int main()
     try
     {
         std::cout << "Instantiating SimpleGlame" << std::endl;
-        SimpleGame sg(p_world, loop_rate_ms);
+        SimpleGame sg(p_world);
 
         std::cout << "Instantiating characters" << std::endl;
         // char_state_t monster1 = {0,0,0,'<',true};     // init char_state_t structure
@@ -95,25 +95,23 @@ int main()
         // I combined the above lines into a single line
         //                \/ Create a new monster object in memory
         //                             \/ Pass the monster custructor a char_state_t structure
-        //                                       \/ C trick for structure init
-        p_monsters[0] = new monster(EATER_ID,  eater_row_init,eater_col_init,  eater,true);
+        p_monsters[0] = new monster(EATER_ID, eater_row_init, eater_col_init, eater, true);
 
         for(int ii=0; ii<ghosts; ii++)
-            p_monsters[ii+1] = new monster(GHOST_ID, ghost_row_init, ghost_col_init+ii, ghost, true);
+            p_monsters[ii+1] = new monster(GHOST_ID+ii, ghost_row_init, ghost_col_init+ii, ghost, true);
 
         // Add each character to the SimpleGame object
         for(int ii=0; ii<(ghosts+1); ii++)
         {
-            char_message_t char_message;
-            p_monsters[ii]->message_to_engine(char_message);
-            std::cout << "Adding character to SimpleGame " << "id: " << char_message.id << std::endl;
+            const position_t pos = p_monsters[ii]->get_new_position();
+            std::cout << "Adding character to SimpleGame " << "id: " << pos.id << std::endl;
             sg.add_character(p_monsters[ii]);
         }
 
         std::cout << "START GAME" << std::endl;
         try
         {
-            sg.start_game(); // This method will not return until the game is over.
+            sg.start_game(loop_rate_ms); // This method will not return until the game is over.
         }
         catch (const char* msg)
         {

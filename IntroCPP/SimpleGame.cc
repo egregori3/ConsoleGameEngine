@@ -12,127 +12,122 @@
 #include "graphics.h"
 
 
-void update_info_display(std::vector<info_window_message_t> &info_window_list, graphics *p_graphics)
+void SimpleGame::test_collision(void)
 {
-        std::vector<info_window_message_t>::iterator it;
-        for (it = info_window_list.begin(); it != info_window_list.end(); ++it)
+    DB("Test Collision");
+    std::vector<character *>::iterator it1;
+    std::vector<character *>::iterator it2;
+    for (it1 = characters.begin(); it1 != characters.end(); ++it1)
+    {
+        character *p_char1 = *it1;
+        position_t char1 = p_char1->get_new_position();
+        for (it2 = characters.begin(); it2 != characters.end(); ++it2)
         {
-            info_window_message_t info_window = *it;
-            p_graphics->write(  info_window.row_start, info_window.col_start, 
-                                info_window.width,     info_window.height, 
-                                info_window.message);
+            character *p_char2 = *it2;
+            if(p_char1 != p_char2)
+            {
+                position_t char2 = p_char2->get_new_position();
+                if(char1.id != char2.id)
+                {
+                    if((char1.row == char2.row) && (char1.col == char2.col))
+                    {
+                        p_char1->collision(char2.id);
+                        p_char2->collision(char1.id);
+                    }
+                }
+            }
         }
-
-        info_window_list.clear();
+    }   // collision loop
 }
 
 
-void SimpleGame::init_collision(void)
+void SimpleGame::display_text(void)
 {
+    DB("Display Text");
     std::vector<character *>::iterator it;
-//    std::cout << "init collision: " << (rows*cols) << std::endl;
-    memset(collision_array, 0, (rows*cols)*sizeof(int));
     for (it = characters.begin(); it != characters.end(); ++it)
     {
         character *p_base = *it;
-        char_message_t char_message;
-        p_base->message_to_engine(char_message); // fill out char_message
-        int row = char_message.row;
-        int col = char_message.col;
-        int id  = char_message.id;
-        uint32_t idx = ((row - row_start)*cols+(col - col_start));
-//        std::cout << "idx: " << idx << std::endl;
-        collision_array[idx] = id;
-    }
+        text_window_t window = p_base->get_text();
+        p_graphics->write(  window.row_start, window.col_start, 
+                            window.width,     window.height, 
+                            window.message);
+    } 
 }
 
 
-bool SimpleGame::check_collision(int row, int col, int &id)
+void SimpleGame::character_update(void)
 {
-    uint32_t idx = ((row - row_start)*cols+(col - col_start));
-    if(collision_array[idx] != 0)
+    DB("Character Update");
+    int debug_row = 0;
+    std::vector<character *>::iterator it;
+    for (it = characters.begin(); it != characters.end(); ++it)
     {
-        id = collision_array[idx];
-        return true;
-    }
+        character *p_base = *it;
 
-    return false;
+        const ui_message_t ui = get_user_input();
+        if(ui == UI_EXIT)
+            running = false;
+
+        if(ui == UI_PAUSE)
+            paused = true;
+
+        const position_t         pos          = p_base->get_old_position();
+        const surroundings_t     surroundings = p_user_world->get_surroundings(pos.row,
+                                                                               pos.col);
+        const game_engine_data_t status       = p_base->update(ui, surroundings);
+        if(status.debug_message.length() > 0)
+        {
+            p_graphics->write(status.debug_row+(debug_row++), status.debug_col,
+                              80, 10, status.debug_message);
+        }
+
+        if(status.game_over)
+            running = false;
+    }   
 }
 
 
-void SimpleGame::game_loop(void)
+void SimpleGame::display_graphics(void)
+{
+    DB("Display Graphics");
+    std::vector<character *>::iterator it;
+    for (it = characters.begin(); it != characters.end(); ++it)
+    {
+        character *p_base = *it;
+        graphic_data_t data = p_base->get_graphics(); 
+        if(data.changed)
+        {
+            DB("Update Graphics");
+            p_graphics->write(  data.new_pos.row, 
+                                data.new_pos.col, 
+                                data.new_pos.c);
+            int background_char = p_user_world->update(data.old_pos.row, data.old_pos.col, (int)' ');
+            p_graphics->write(  data.old_pos.row, 
+                                data.old_pos.col, 
+                                background_char);
+        }
+    }
+    p_graphics->refresh();
+}
+
+
+void SimpleGame::game_loop(int loop_rate_in_ms)
 {
     if((p_user_world == NULL) || (p_graphics == NULL))
         throw "SimpleGame::game_loop NULL pointer";
 
-    std::vector<info_window_message_t> info_window_list;
+    DB("Entering game loop");
+
     for(bool running=true; running; )
     {
-        // https://limbioliong.wordpress.com/2012/12/25/storing-c-objects-in-a-stl-vector-part-2/
-        // https://www.oreilly.com/library/view/c-cookbook/0596007612/ch06s05.html
-        // https://www.dreamincode.net/forums/topic/63358-store-class-objects-in-vector/
-        // https://linuxhint.com/use_cpp_vector/
-        init_collision();
-        std::vector<character *>::iterator it;
-        for (it = characters.begin(); it != characters.end(); ++it)
+        if(!paused && running)
         {
-            character *p_base = *it;
-            char_message_t  old_char_message;
-            char_message_t  new_char_message;
-            world_message_t world_message;
-            bool updated;
-
-            {   // Get current state of the game
-                p_base->message_to_engine(old_char_message);
-                p_user_world->tx_message_to_engine(old_char_message.row, 
-                                                   old_char_message.col,
-                                                   world_message);
-            }
-
-            {   // Update character
-                ui_message_t ui = get_user_input();
-                if(ui == UI_EXIT)
-                    running = false;
-
-                if(ui == UI_PAUSE)
-                    paused = true;
-
-                p_base->update_message_from_engine((const ui_message_t)ui, 
-                    (const world_message_t)world_message, updated); // send message to characer
-            }
-
-            {   // Collision detection with updated character info
-                int id;
-                p_base->message_to_engine(new_char_message);
-                if(check_collision(new_char_message.row, new_char_message.col, id))
-                {
-                    p_base->collision_message_from_engine(new_char_message, id);
-                }
-            }
-
-            // Get display info from character
-            p_base->get_display_info(info_window_list);
-
-            // Graphics
-            if(updated && !paused)
-            {
-                p_user_world->update_message_from_engine((const char_message_t)new_char_message);
-                p_graphics->write(new_char_message.row, 
-                                  new_char_message.col, 
-                                  new_char_message.c);
-                if((new_char_message.row != old_char_message.row) ||
-                   (new_char_message.col != old_char_message.col))
-                {
-                    p_graphics->write(old_char_message.row, 
-                                  old_char_message.col, 
-                                  (new_char_message.replace>0)?new_char_message.replace:world_message.c);
-                }
-                p_graphics->refresh();
-            }
-        } // Character loop
-
-        p_user_world->get_display_info(info_window_list);
-        update_info_display(info_window_list, p_graphics);
+            character_update();
+            test_collision();
+            display_graphics();
+      //      display_text();
+        }   
 
         // Pause
         while(paused && running)
@@ -150,7 +145,10 @@ void SimpleGame::game_loop(void)
 
         usleep(loop_rate_in_ms*1000);
     } // Game Loop
+
+    DB("Existing game loop");
 }
+
 
 ui_message_t SimpleGame::get_user_input(void)
 {
@@ -164,38 +162,34 @@ ui_message_t SimpleGame::get_user_input(void)
 void SimpleGame::add_character(character *p_user_char)
 {
     // https://www.oreilly.com/library/view/c-cookbook/0596007612/ch06s05.html
-
-    char_message_t new_char;
-    p_user_char->message_to_engine(new_char);
     {
         // If the character ID is already registered, return error
+        position_t this_char_pos = p_user_char->get_new_position();
         std::vector<character *>::iterator it;
         for (it = characters.begin(); it != characters.end(); ++it)
         {
             character *p_base = *it;
-            char_message_t old_char;
-            p_base->message_to_engine(old_char);
-            if(new_char.id == old_char.id)
+            position_t new_char_pos = p_base->get_new_position();
+            if(new_char_pos.id == this_char_pos.id)
                 throw "SimpleGame::add_character duplicate id's";
         }
     }
     characters.push_back(p_user_char);
 }
 
-SimpleGame::SimpleGame(world *p_world, int loop_rate)
+
+SimpleGame::SimpleGame(world *p_world)
 {
     p_user_world    = p_world;
-    loop_rate_in_ms = loop_rate;
 }
 
-void SimpleGame::start_game(void)
+
+void SimpleGame::start_game(int loop_rate_in_ms)
 {
     std::string background;
+
     p_user_world->get_world(background, row_start, col_start, rows, cols);
     std::cout << "Allocating: " << (rows*cols) << std::endl;
-    collision_array = (int *)calloc((rows*cols),sizeof(int));
-    if(collision_array == NULL)
-        throw "Falied to allocate collision memory";
     p_graphics = new graphics(rows, cols);
     p_graphics->write(row_start, col_start, background);
     {
@@ -203,14 +197,14 @@ void SimpleGame::start_game(void)
         for (it = characters.begin(); it != characters.end(); ++it)
         {
             character *p_base = *it;
-            char_message_t init;
-            p_base->message_to_engine(init);
-            if(init.display == true)
-                p_graphics->write(init.row, init.col, init.c);
+            const graphic_data_t data = p_base->get_graphics();
+            if(data.display == true)
+                p_graphics->write(data.new_pos.row, data.new_pos.col, data.new_pos.c);
         }
     }
-    game_loop();
+    game_loop(loop_rate_in_ms);
 }
+
 
 SimpleGame::~SimpleGame()
 {

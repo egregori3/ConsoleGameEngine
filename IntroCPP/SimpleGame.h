@@ -102,25 +102,27 @@ class SimpleGame
         std::vector<character *> characters;
         world *p_user_world  = NULL;
         graphics *p_graphics = NULL;
-        int *collision_array = NULL;
-        int loop_rate_in_ms;
-        int rows;
-        int cols;
-        int row_start;
-        int col_start;
-        bool paused = false;
+        bool paused          = false;
+        bool update_graphics = false;
+        bool running         = true;
+        int  rows;
+        int  cols;
+        int  row_start;
+        int  col_start;
 
     private:
         ui_message_t get_user_input(void);
-        void game_loop(void);
+        void game_loop(int loop_rate_in_ms);
+        void test_collision(void);
+        void character_update(void);
+        void display_text(void);
+        void display_graphics();
 
     public:
-        SimpleGame( world *p_world, int loop_rate);
+        SimpleGame( world *p_world);
         ~SimpleGame();
         void add_character(character *p_user_char);
-        void start_game(void);
-        void init_collision(void);
-        bool check_collision(int row, int col, int &id);
+        void start_game(int loop_rate_in_ms);
 };
 
 #endif

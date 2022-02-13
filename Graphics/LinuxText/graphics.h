@@ -27,6 +27,7 @@
 class graphics
 {
     private:
+        int     previous_debug_width = 0;
         int     width, height;
         int     write(int row_start, int col_start, std::string bg, int cols);
 
