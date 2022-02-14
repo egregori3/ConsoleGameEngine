@@ -55,13 +55,12 @@
  ******************************************************************************/
 
 
-const int wrows = 21;
-const int wcols = 40;
-const int wrow_start = 1;
-const int wcol_start = 0;
-
-const int debug_row  = 30;
-const int debug_col  = 0;
+const int wrows                 = 21;
+const int wcols                 = 40;
+const int wrow_start            = 1;
+const int wcol_start            = 0;
+const int collision_debug_row   = 25;
+const int update_debug_row      = 32;
 
 const std::string arena =
   // 0         1         2         3        3
@@ -98,17 +97,19 @@ const std::string arena =
 eater_world::eater_world()
 {
     arena_cpy.assign(arena);
+    world_data.background_rows       = wrows;
+    world_data.background_cols       = wcols;
+    world_data.background_start_row  = wrow_start;
+    world_data.background_start_col  = wcol_start;
+    world_data.collision_debug_row   = collision_debug_row;
+    world_data.update_debug_row      = update_debug_row;
 }
 
 
-void eater_world::get_world(std::string &background, 
-                            int &row_start, int &col_start, int &rows, int &cols)
+void eater_world::get_world(std::string &background, world_data_t &wd)
 {
-   background = arena;
-   rows       = wrows;
-   cols       = wcols;
-   row_start  = wrow_start;
-   col_start  = wcol_start;
+   background    = arena;
+   wd            = world_data;
 }
 
 
@@ -275,58 +276,48 @@ const text_window_t monster::get_text(void)
     return message_window;
 }
 
-{
-    int         debug_row;
-    int         debug_col;
-    std::string debug_message; 
-}   debug_message_t;
 
-void debug_message_t monster::collision(int id)
+const debug_message_t monster::collision(int id)
 {
+    debug_message_t debug_message;
+
     if(id == EATER_ID)
     {
-        collision_eater(id);
+        debug_message = collision_eater(id);
     }
     else
     {
-        collision_monster(id);
+        debug_message = collision_monster(id);
     }
+
+    return debug_message;
 }
 
 
-const debug_mesage_t monster::update(const ui_message_t &user_input,
+const debug_message_t monster::update(const ui_message_t &user_input,
                                      const surroundings_t &surroundings)
 {
-    game_engine_data_t game_status = {.debug_row = debug_row, .debug_col = debug_col};
+    debug_message_t msg;
 
     if(id == EATER_ID)
     {
-        update_eater(user_input, surroundings);
+        msg = update_eater(user_input, surroundings);
     }
     else
     {
-        update_monster(surroundings);
+        msg = update_monster(surroundings);
     }
 
     iterations++;
 
-    game_status.delay         = delay_engine;
-    game_status.game_over     = game_over;
-    game_status.debug_message = debug_message;
-    debug_message.clear();
-    delay_engine              = 0;
-
-    return game_status;
+    return msg;
 }
 
 
-const engine_loop_t get_loop_delay(void)
+const engine_loop_t monster::get_loop_delay(void)
 {
-{
-    int             delay;
-    bool            game_over; // set to end the game
-    debug_message_t debug_message; 
-}   engine_loop_t;
+    const engine_loop_t retval = {.delay=50, .game_over=false};
+    return retval;
 }
 
 

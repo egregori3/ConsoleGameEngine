@@ -20,7 +20,6 @@
 bool monster::eater_test(const int input)
 {
     bool move = false;
-    replace = ' ';
     switch(input)
     {
         case ' ':
@@ -35,8 +34,10 @@ bool monster::eater_test(const int input)
 }
 
 // update_message_from_engine
-void monster::update_eater(const ui_message_t &user_input, const surroundings_t &ws)
+const debug_message_t monster::update_eater(const ui_message_t &user_input, const surroundings_t &ws)
 {
+    debug_message_t msg = {std::string()};
+
     if(eater_state != EATING)
     {
         if(!(iterations % 32))
@@ -65,7 +66,7 @@ void monster::update_eater(const ui_message_t &user_input, const surroundings_t 
             }
         }
 
-        return;
+        return msg;
     }
 
 //    oss << "test: " << my_state.row << ","
@@ -97,14 +98,18 @@ void monster::update_eater(const ui_message_t &user_input, const surroundings_t 
         new_col = old_col + 1;
         new_c = '<';
     }
+
+    return msg;
 }
 
 
-void monster::collision_eater(int col_id)
+const debug_message_t monster::collision_eater(int col_id)
 {
-    debug_message += "collision: " + std::to_string(id) + ", " + std::to_string(col_id);
+    debug_message_t msg = {std::string()};
+    msg.debug_message += "collision: " + std::to_string(id) + ", " + std::to_string(col_id);
     if(eater_state == EATING)
         eater_state = DEAD1;
     delay_engine = 1;
+    return msg;
 }
 

@@ -123,8 +123,6 @@ typedef struct
 
 typedef struct
 {
-    int         debug_row;
-    int         debug_col;
     std::string debug_message; 
 }   debug_message_t;
 
@@ -166,9 +164,18 @@ typedef struct
 {
     int             delay;
     bool            game_over; // set to end the game
-    debug_message_t debug_message; 
 }   engine_loop_t;
 
+
+typedef struct
+{
+    int background_rows;
+    int background_cols;
+    int background_start_row;
+    int background_start_col;
+    int collision_debug_row;
+    int update_debug_row;
+}   world_data_t;
 
 
 /**
@@ -242,11 +249,10 @@ class world
 {
     public:
         // pure virtual function (ZC8.4)
-        virtual void                 get_world(std::string &background, 
-                                       int &row_start, int &col_start, 
-                                       int &rows, int &cols)            = 0;
-        virtual const surroundings_t get_surroundings(int row, int col) = 0;
-        virtual const int            update(int row, int col, int c)    = 0;
+        virtual void                 get_world(std::string &background,
+                                               world_data_t &world_data) = 0;
+        virtual const surroundings_t get_surroundings(int row, int col)  = 0;
+        virtual const int            update(int row, int col, int c)     = 0;
 };
 
 #endif

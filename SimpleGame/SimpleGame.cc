@@ -15,6 +15,7 @@
 void SimpleGame::test_collision(void)
 {
     DB("Test Collision");
+    int row_adder = 1;
     std::vector<character *>::iterator it1;
     std::vector<character *>::iterator it2;
     for (it1 = characters.begin(); it1 != characters.end(); ++it1)
@@ -29,8 +30,19 @@ void SimpleGame::test_collision(void)
                 position_t char2 = p_char2->get_new_position();
                 if((char1.row == char2.row) && (char1.col == char2.col))
                 {
-                    p_char1->collision(char2.id);
-                    p_char2->collision(char1.id);
+                    debug_message_t msg;
+                    msg = p_char1->collision(char2.id);
+                    if(msg.debug_message.length() > 0)
+                    {
+                        p_graphics->write(world_data.collision_debug_row+(row_adder++), 0,
+                              80, 10, msg.debug_message);
+                    }
+                    msg = p_char2->collision(char1.id);
+                    if(msg.debug_message.length() > 0)
+                    {
+                        p_graphics->write(world_data.collision_debug_row+(row_adder++), 0,
+                              80, 10, msg.debug_message);
+                    }
                 }
             }
         }
@@ -57,6 +69,7 @@ void SimpleGame::character_update(void)
 {
     DB("Character Update");
     int debug_row = 0;
+    loop_delay    = 0;
     std::vector<character *>::iterator it;
     for (it = characters.begin(); it != characters.end(); ++it)
     {
@@ -72,20 +85,17 @@ void SimpleGame::character_update(void)
         const position_t         pos          = p_base->get_old_position();
         const surroundings_t     surroundings = p_user_world->get_surroundings(pos.row,
                                                                                pos.col);
-        const game_engine_data_t status       = p_base->update(ui, surroundings);
-        if(status.debug_message.length() > 0)
+        const debug_message_t    msg          = p_base->update(ui, surroundings);
+        if(msg.debug_message.length() > 0)
         {
-            p_graphics->write(status.debug_row+(debug_row++), status.debug_col,
-                              80, 10, status.debug_message);
+            p_graphics->write(world_data.update_debug_row+(debug_row++), 0,
+                              80, 10, msg.debug_message);
         }
-
-        if(status.delay > 0)
-            sleep(status.delay);
-
-        if(status.game_over)
-        {
-           running = false;
-        }
+        const engine_loop_t      engine_loop  = p_base->get_loop_delay();
+        if(engine_loop.game_over)
+            running = false;
+        if(engine_loop.delay > loop_delay)
+            loop_delay = engine_loop.delay;
     }  
 }
 
@@ -114,7 +124,7 @@ void SimpleGame::display_graphics(void)
 }
 
 
-void SimpleGame::game_loop(int loop_rate_in_ms)
+void SimpleGame::game_loop(void)
 {
     if((p_user_world == NULL) || (p_graphics == NULL))
         throw "SimpleGame::game_loop NULL pointer";
@@ -187,11 +197,15 @@ SimpleGame::SimpleGame(world *p_world)
 }
 
 
-void SimpleGame::start_game(int loop_rate_in_ms)
+void SimpleGame::start_game(void)
 {
     std::string background;
 
-    p_user_world->get_world(background, row_start, col_start, rows, cols);
+    p_user_world->get_world(background, world_data);
+    int rows      = world_data.background_rows;
+    int cols      = world_data.background_cols;
+    int row_start = world_data.background_start_row;
+    int col_start = world_data.background_start_col;
     std::cout << "Allocating: " << (rows*cols) << std::endl;
     p_graphics = new graphics(rows, cols);
     p_graphics->write(row_start, col_start, background);
@@ -205,7 +219,7 @@ void SimpleGame::start_game(int loop_rate_in_ms)
                 p_graphics->write(data.new_pos.row, data.new_pos.col, data.new_pos.c);
         }
     }
-    game_loop(loop_rate_in_ms);
+    game_loop();
 }
 
 

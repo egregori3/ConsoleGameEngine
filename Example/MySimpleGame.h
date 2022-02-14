@@ -93,6 +93,7 @@ typedef enum
 class eater_world : public world
 {
     private:
+        world_data_t world_data;
         // https://www.cplusplus.com/reference/sstream/ostringstream/str/
         std::ostringstream oss; 
         std::string arena_cpy;
@@ -100,9 +101,7 @@ class eater_world : public world
     public:
         eater_world();
 
-        void get_world(std::string &background,
-                       int &row_start, int &col_start, int &rows, int &cols);
-
+        void get_world(std::string &background, world_data_t &world_data);
         const surroundings_t get_surroundings(int row, int col);
         const int            update(int row, int col, int c);
 };
@@ -145,13 +144,13 @@ class monster : public character
         std::uniform_real_distribution<float> distr;
 
     private:
-        void update_eater(const ui_message_t &user_input, 
-                          const surroundings_t &surroundings);
-        void update_monster(const surroundings_t &surroundings);
+        const debug_message_t update_eater(const ui_message_t &user_input, 
+                                           const surroundings_t &surroundings);
+        const debug_message_t update_monster(const surroundings_t &surroundings);
         bool eater_test(int user_input);
         bool monster_test(int user_input);
-        void collision_eater(int id);
-        void collision_monster(int id);
+        const debug_message_t collision_eater(int id);
+        const debug_message_t collision_monster(int id);
 
     public:
         monster(int id, int row, int col, int c, bool display);

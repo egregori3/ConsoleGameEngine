@@ -55,7 +55,6 @@
 extern std::string arena;
 
 // Game hyper-parameters
-const int  loop_rate_ms = 20;
 const int  ghosts = 5; // 5
 const int  ghost = 'H'; // Initial "graphic" - can be overrriden by your derived class
 const int  eater = '>';
@@ -111,7 +110,7 @@ int main()
         std::cout << "START GAME" << std::endl;
         try
         {
-            sg.start_game(loop_rate_ms); // This method will not return until the game is over.
+            sg.start_game(); // This method will not return until the game is over.
         }
         catch (const char* msg)
         {

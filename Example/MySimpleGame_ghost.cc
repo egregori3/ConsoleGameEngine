@@ -25,7 +25,6 @@
 bool monster::monster_test(const int input)
 {
     bool move = false;
-    replace = 0;
     switch(input)
     {
         case ' ':
@@ -53,8 +52,9 @@ std::string decode_motion(motion_t in)
 }
 
 // update_message_from_engine
-void monster::update_monster(const surroundings_t &ws)
+const debug_message_t monster::update_monster(const surroundings_t &ws)
 {
+    debug_message_t msg = {std::string()};
     std::string debug = "ID: " + std::to_string(id) + ", ";
 
     // https://www.geeksforgeeks.org/set-find-function-in-c-stl/
@@ -63,7 +63,7 @@ void monster::update_monster(const surroundings_t &ws)
 
     if(iterations % 16)
     {
-        return; // Only update the ghost's position once every 16 calls
+        return msg; // Only update the ghost's position once every 16 calls
     }
 
     if(monster_test(ws.tc) == true)
@@ -153,10 +153,14 @@ void monster::update_monster(const surroundings_t &ws)
     debug += std::to_string(new_c);
     debug += ")";
 
-    debug_message += debug;
+    msg.debug_message = debug;
+
+    return msg;
 }
 
 
-void monster::collision_monster(int id)
+const debug_message_t monster::collision_monster(int id)
 {
+    const debug_message_t msg = {std::string("collision: ")+std::to_string(id)};
+    return msg;
 }
