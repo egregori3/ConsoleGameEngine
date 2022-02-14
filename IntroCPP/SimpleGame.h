@@ -105,6 +105,7 @@ class SimpleGame
         bool paused          = false;
         bool update_graphics = false;
         bool running         = true;
+        int  loop_delay      = 50;
         int  rows;
         int  cols;
         int  row_start;

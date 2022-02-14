@@ -6,6 +6,7 @@
 #include <iostream>
 #include <memory>
 #include "interfaces.h"
+#include "graphics.h"
 
 
 /******************************************************************************
@@ -53,16 +54,6 @@
  *  provided by the base class. A pure virtual function is a function that    *
  *  must be overridden in a derived class and need not be defined.            *
  *                                                                            *
- *  Smart Pointers:                                                           *
- *  https://en.cppreference.com/w/cpp/memory/shared_ptr                       *
- *  Pointers: with great power comes great responsibility.                    *
- *  Although powerful, pointers have been the cause of many bugs.             *
- *  In response, C++11 introduced smart pointers.                             *
- *  std::shared_ptr is a smart pointer that retains shared ownership of an    *
- *  object through a pointer. Several shared_ptr objects may own the same     *
- *  object. A shared_ptr can share ownership of an object while storing a     *
- *  pointer to another object.                                                *
- *                                                                            *
  *  Vectors:                                                                  *
  *  https://linuxhint.com/use_cpp_vector/                                     *
  *  www.dreamincode.net/forums/topic/63358-store-class-objects-in-vector/     *
@@ -70,6 +61,22 @@
  *  An array cannot increase ore reduce in length. A vector is like an array, *
  *  but its length can be increased or reduced. A vector, therefore,          *
  *  has many more operations than an array.                                   *
+ *                                                                            *
+ *  Pointers:   (ZC10.2)                                                      *
+ *  https://www.educative.io/edpresso/differences-between-pointers-and-references-in-cpp
+ *  A pointer in C++ is a variable that holds the memory address of another   *
+ *  variable.                                                                 *
+ *                                                                            *
+ *  References: (ZC4.8)                                                       *
+ *  A reference is an alias for an already existing variable.                 *
+ *  Once a reference is initialized to a variable, it cannot be changed to    *
+ *  refer to another variable. Hence, a reference is similar to a const       *
+ *  pointer.                                                                  *
+ *                                                                            *
+ *  Strings:    (ZC2.15)                                                      *
+ *  http://pages.cs.wisc.edu/~hasti/cs368/CppTutorial/NOTES/STRING.html       *
+ *  The string class is part of the C++ standard library. A string represents *
+ *  a sequence of characters.                                                 *
  *                                                                            *
  *  SimpleGame game loop                                                      *
  *   Init:                                                                    *
@@ -86,40 +93,37 @@
  *  12/21 Eric Gegori - File created                                          *
  *                                                                            *
  * @section SOURCES                                                           *
- *  @see http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines          *
- *  @see https://www.modernescpp.com                                          *
- *  @see https://isocpp.org/wiki/faq/abcs                                     *
- *  @see https://www.learncpp.com/                                            *
- *  @see https://www.guru99.com/                                              *
- *  @see https://www.fluentcpp.com/                                           *
- *  @see https://en.cppreference.com/                                         *
- *  @see https://www.cs.fsu.edu/                                              *
- *  @see https://www.tutorialspoint.com/                                      *
- *  @see https://www.drdobbs.com/                                             *
- *  @see https://www.cplusplus.com/                                           *
- *  @see https://www.dreamincode.net/                                         *
- *  @see https://linuxhint.com/                                               *
+ *  https://github.com/egregori3/ConsoleGameEngine/blob/master/README.md      *
  ******************************************************************************/
 
 class SimpleGame
 {
     private:
-        // https://www.drdobbs.com/collecting-shared-objects/184401839
-        std::vector< std::shared_ptr<character> > characters;
-        std::unique_ptr<world> p_user_world;
-        std::string background;
+        std::vector<character *> characters;
+        world *p_user_world  = NULL;
+        graphics *p_graphics = NULL;
+        bool paused          = false;
+        bool update_graphics = false;
+        bool running         = true;
+        int  loop_delay      = 50;
+        int  rows;
+        int  cols;
+        int  row_start;
+        int  col_start;
 
     private:
-        ui_t get_user_input(void);
-        int  init_background(std::string bg);
-        int  update_display(int x, int y, char c);
-        int game_loop(void);
+        ui_message_t get_user_input(void);
+        void game_loop(int loop_rate_in_ms);
+        void test_collision(void);
+        void character_update(void);
+        void display_text(void);
+        void display_graphics();
 
     public:
-        SimpleGame( std::unique_ptr<world> p_world, std::string background, 
-                    int loop_rate);
-        int add_character(std::unique_ptr<character> user_char);
-        int start_game(void);
+        SimpleGame( world *p_world);
+        ~SimpleGame();
+        void add_character(character *p_user_char);
+        void start_game(int loop_rate_in_ms);
 };
 
 #endif

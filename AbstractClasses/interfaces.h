@@ -123,6 +123,14 @@ typedef struct
 
 typedef struct
 {
+    int         debug_row;
+    int         debug_col;
+    std::string debug_message; 
+}   debug_message_t;
+
+
+typedef struct
+{
     int  id;        // id of character - the user can use for whatever they want
     int  row;       // row position of character
     int  col;       // col position of character
@@ -156,12 +164,10 @@ typedef struct
 
 typedef struct
 {
-    bool        changed;
-    bool        game_over; // set to end the game
-    int         debug_row;
-    int         debug_col;
-    std::string debug_message; 
-}   game_engine_data_t;
+    int             delay;
+    bool            game_over; // set to end the game
+    debug_message_t debug_message; 
+}   engine_loop_t;
 
 
 
@@ -192,13 +198,14 @@ class character
 {
     public: // 
         // pure virtual function (ZC8.4)
-        virtual const position_t         get_old_position(void) = 0;
-        virtual const position_t         get_new_position(void) = 0;
-        virtual const graphic_data_t     get_graphics(void)     = 0;
-        virtual const text_window_t      get_text(void)         = 0;
-        virtual void                     collision(int id)      = 0;
-        virtual const game_engine_data_t update( const ui_message_t &ui, 
-                                                 const surroundings_t &surroundings) = 0;
+        virtual const position_t      get_old_position(void) = 0;
+        virtual const position_t      get_new_position(void) = 0;
+        virtual const graphic_data_t  get_graphics(void)     = 0;
+        virtual const text_window_t   get_text(void)         = 0;
+        virtual const engine_loop_t   get_loop_delay(void)   = 0;
+        virtual const debug_message_t collision(int id)      = 0;
+        virtual const debug_message_t update(const ui_message_t &ui, 
+                                             const surroundings_t &surroundings) = 0;
 };
 
 

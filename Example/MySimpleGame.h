@@ -132,13 +132,12 @@ class monster : public character
         motion_t        old_motion;
 
         // Initialized here requires C++11
-        int             replace;   // character to put into old position
         int             iterations      = 0;
         int             score           = 0;
+        int             delay_engine    = 0;
         bool            game_over       = false;
         eater_state_t   eater_state     = EATING;
         ghost_state_t   ghost_state     = CHASE;
-        std::string     debug_message;
         // https://www.cplusplus.com/reference/sstream/ostringstream/str/
         std::ostringstream oss; 
         std::random_device rd;
@@ -157,13 +156,14 @@ class monster : public character
     public:
         monster(int id, int row, int col, int c, bool display);
 
-        const position_t         get_old_position(void);
-        const position_t         get_new_position(void);
-        const graphic_data_t     get_graphics(void);
-        const text_window_t      get_text(void);
-        void                     collision(int id);
-        const game_engine_data_t update( const ui_message_t &ui, 
-                                         const surroundings_t &surroundings);
+        const position_t      get_old_position(void);
+        const position_t      get_new_position(void);
+        const graphic_data_t  get_graphics(void);
+        const text_window_t   get_text(void);
+        const engine_loop_t   get_loop_delay(void);
+        const debug_message_t collision(int id);
+        const debug_message_t update(const ui_message_t &ui, 
+                                     const surroundings_t &surroundings);
 };
 
 

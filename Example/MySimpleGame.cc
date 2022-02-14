@@ -244,6 +244,19 @@ const text_window_t monster::get_text(void)
     std::stringstream   message_string;
     text_window_t       message_window;
 
+    if(game_over)
+    {
+        message_string << "Game Over";
+        message_window = {
+                            .row_start = wrows+wrow_start+1,
+                            .col_start = 0,
+                            .width     = 40,
+                            .height    = 1,
+                            .message   = message_string.str()
+                         };
+        return message_window;
+    }
+
     switch(iterations % 4)
     {
         case 0:
@@ -262,8 +275,13 @@ const text_window_t monster::get_text(void)
     return message_window;
 }
 
+{
+    int         debug_row;
+    int         debug_col;
+    std::string debug_message; 
+}   debug_message_t;
 
-void monster::collision(int id)
+void debug_message_t monster::collision(int id)
 {
     if(id == EATER_ID)
     {
@@ -276,8 +294,8 @@ void monster::collision(int id)
 }
 
 
-const game_engine_data_t monster::update(const ui_message_t &user_input,
-                                         const surroundings_t &surroundings)
+const debug_mesage_t monster::update(const ui_message_t &user_input,
+                                     const surroundings_t &surroundings)
 {
     game_engine_data_t game_status = {.debug_row = debug_row, .debug_col = debug_col};
 
@@ -292,11 +310,23 @@ const game_engine_data_t monster::update(const ui_message_t &user_input,
 
     iterations++;
 
+    game_status.delay         = delay_engine;
     game_status.game_over     = game_over;
     game_status.debug_message = debug_message;
     debug_message.clear();
+    delay_engine              = 0;
 
     return game_status;
+}
+
+
+const engine_loop_t get_loop_delay(void)
+{
+{
+    int             delay;
+    bool            game_over; // set to end the game
+    debug_message_t debug_message; 
+}   engine_loop_t;
 }
 
 

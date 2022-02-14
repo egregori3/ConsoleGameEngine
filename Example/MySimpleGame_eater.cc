@@ -100,10 +100,11 @@ void monster::update_eater(const ui_message_t &user_input, const surroundings_t 
 }
 
 
-void monster::collision_eater(int id)
+void monster::collision_eater(int col_id)
 {
-    debug_message += "collision: " + std::to_string(id) + ", ";
+    debug_message += "collision: " + std::to_string(id) + ", " + std::to_string(col_id);
     if(eater_state == EATING)
         eater_state = DEAD1;
+    delay_engine = 1;
 }
 
