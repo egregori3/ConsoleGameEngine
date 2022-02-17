@@ -121,13 +121,11 @@ class monster : public character
     private:
         // Initalized by constructor
         int             id;        // id of character - the user can use for whatever they want
-        int             old_row;   // row position of character
-        int             old_col;   // col position of character
-        int             char_write_old_pos;
-        int             new_row;   // row position of character
-        int             new_col;   // col position of character
-        int             char_write_new_pos;
+        int             char_write_current_pos;
+        int             char_write_next_pos;
         bool            display;   // set to true to display the character
+        position_t      current;
+        position_t      next;
         motion_t        old_motion;
 
         int             iterations;
@@ -156,8 +154,8 @@ class monster : public character
     public:
         monster(int id, int row, int col, int c, bool display);
 
-        const position_t      get_old_position(void);
-        const position_t      get_new_position(void);
+        const position_t      get_current_position(void);
+        const position_t      get_next_position(void);
         const graphic_data_t  get_graphics(void);
         const text_window_t   get_text(void);
         const engine_loop_t   get_loop_delay(void);
