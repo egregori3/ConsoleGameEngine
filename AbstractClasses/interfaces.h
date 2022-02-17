@@ -70,10 +70,75 @@
 
 //#define DISABLE_GRAPHICS // if DISABLE_GRAPHICS is defined, graphics are disabled
 #ifdef  DISABLE_GRAPHICS
-#define DB(X) std::cerr << "Debug >" << X << "< " << __FILE__ << " "<<  __LINE__ << "\n"
+    #ifdef  DEBUG0
+        #define DB0(X) std::cerr << "Debug 0 >" << X << "< " << __FILE__ << " "<<  __LINE__ << "\n"
+    #else
+        #define DB0(X)
+    #endif
+    #ifdef  DEBUG1
+        #define DB1(X) std::cerr << "Debug 1 >" << X << "< " << __FILE__ << " "<<  __LINE__ << "\n"
+    #else
+        #define DB1(X)
+    #endif
+    #ifdef  DEBUG2
+        #define DB2(X) std::cerr << "Debug 2 >" << X << "< " << __FILE__ << " "<<  __LINE__ << "\n"
+    #else
+        #define DB2(X)
+    #endif
+    #ifdef  DEBUG3
+        #define DB3(X) std::cerr << "Debug 3 >" << X << "< " << __FILE__ << " "<<  __LINE__ << "\n"
+    #else
+        #define DB3(X)
+    #endif
+    #ifdef  DEBUG4
+        #define DB4(X) std::cerr << "Debug 4 >" << X << "< " << __FILE__ << " "<<  __LINE__ << "\n"
+    #else
+        #define DB4(X)
+    #endif
+    #ifdef  DEBUG5
+        #define DB5(X) std::cerr << "Debug 5 >" << X << "< " << __FILE__ << " "<<  __LINE__ << "\n"
+    #else
+        #define DB5(X)
+    #endif
+    #ifdef  DEBUG6
+        #define DB6(X) std::cerr << "Debug 6 >" << X << "< " << __FILE__ << " "<<  __LINE__ << "\n"
+    #else
+        #define DB6(X)
+    #endif
+    #ifdef  DEBUG7
+        #define DB7(X) std::cerr << "Debug 7 >" << X << "< " << __FILE__ << " "<<  __LINE__ << "\n"
+    #else
+        #define DB7(X)
+    #endif
+    #ifdef  DEBUG8
+        #define DB8(X) std::cerr << "Debug 8 >" << X << "< " << __FILE__ << " "<<  __LINE__ << "\n"
+    #else
+        #define DB8(X)
+    #endif
+    #ifdef  DEBUG9
+        #define DB9(X) std::cerr << "Debug 9 >" << X << "< " << __FILE__ << " "<<  __LINE__ << "\n"
+    #else
+        #define DB9(X)
+    #endif
 #else
-#define DB(X)
+    #define DB0(X)
+    #define DB1(X)
+    #define DB2(X)
+    #define DB3(X)
+    #define DB4(X)
+    #define DB5(X)
+    #define DB6(X)
+    #define DB7(X)
+    #define DB8(X)
+    #define DB9(X)
 #endif
+
+// Set to 0 to disable
+#define GAME_LOOP_ROW           44
+#define TEST_COLLISION_ROW      41
+#define DISPLAY_TEXT_ROW        43
+#define CHARACTER_UPDATE_ROW    40
+#define DISPLAY_GRAPHICS_ROW    42
 
 /**
  * https://en.cppreference.com/w/cpp/language/enum
@@ -113,6 +178,7 @@ typedef enum
  */
 typedef struct
 {
+    bool        valid;
     int         row_start;
     int         col_start;
     int         width;
@@ -123,6 +189,7 @@ typedef struct
 
 typedef struct
 {
+    bool        valid;
     std::string debug_message; 
 }   debug_message_t;
 
@@ -132,7 +199,6 @@ typedef struct
     int  id;        // id of character - the user can use for whatever they want
     int  row;       // row position of character
     int  col;       // col position of character
-    int  c;         // character to display
 }   position_t;
 
 
@@ -141,6 +207,8 @@ typedef struct
     int         id;        // id of character - the user can use for whatever they want
     bool        display;   // set to true to display the character
     bool        changed;
+    int         char_write_new_pos;
+    int         char_write_old_pos;
     position_t  old_pos;
     position_t  new_pos;
 }   graphic_data_t;
@@ -252,7 +320,7 @@ class world
         virtual void                 get_world(std::string &background,
                                                world_data_t &world_data) = 0;
         virtual const surroundings_t get_surroundings(int row, int col)  = 0;
-        virtual const int            update(int row, int col, int c)     = 0;
+        virtual void                 update(int row, int col, int c)     = 0;
 };
 
 #endif

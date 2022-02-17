@@ -101,9 +101,9 @@ class eater_world : public world
     public:
         eater_world();
 
-        void get_world(std::string &background, world_data_t &world_data);
+        void  get_world(std::string &background, world_data_t &world_data);
         const surroundings_t get_surroundings(int row, int col);
-        const int            update(int row, int col, int c);
+        void                 update(int row, int col, int c);
 };
 
 /**
@@ -123,20 +123,21 @@ class monster : public character
         int             id;        // id of character - the user can use for whatever they want
         int             old_row;   // row position of character
         int             old_col;   // col position of character
-        int             old_c;     // character to display
+        int             char_write_old_pos;
         int             new_row;   // row position of character
         int             new_col;   // col position of character
-        int             new_c;     // character to display
+        int             char_write_new_pos;
         bool            display;   // set to true to display the character
         motion_t        old_motion;
 
-        // Initialized here requires C++11
-        int             iterations      = 0;
-        int             score           = 0;
-        int             delay_engine    = 0;
-        bool            game_over       = false;
-        eater_state_t   eater_state     = EATING;
-        ghost_state_t   ghost_state     = CHASE;
+        int             iterations;
+        int             score;
+        int             delay_engine;
+        bool            game_over;
+        bool            char_changed;
+        eater_state_t   eater_state;
+        ghost_state_t   ghost_state;
+
         // https://www.cplusplus.com/reference/sstream/ostringstream/str/
         std::ostringstream oss; 
         std::random_device rd;
@@ -147,8 +148,8 @@ class monster : public character
         const debug_message_t update_eater(const ui_message_t &user_input, 
                                            const surroundings_t &surroundings);
         const debug_message_t update_monster(const surroundings_t &surroundings);
-        bool eater_test(int user_input);
-        bool monster_test(int user_input);
+        bool  eater_test(int user_input);
+        bool  monster_test(int user_input);
         const debug_message_t collision_eater(int id);
         const debug_message_t collision_monster(int id);
 

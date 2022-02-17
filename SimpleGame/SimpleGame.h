@@ -96,6 +96,14 @@
  *  https://github.com/egregori3/ConsoleGameEngine/blob/master/README.md      *
  ******************************************************************************/
 
+#define GRAPHIC_WRITE(r,c,msg) {\
+     DB0(msg);\
+     if(p_graphics->write((r),(c),80,10,(msg)) < 0)\
+     {\
+        return -1;\
+     }\
+    }\
+
 class SimpleGame
 {
     private:
@@ -107,14 +115,15 @@ class SimpleGame
         bool update_graphics        = false;
         bool running                = true;
         int  loop_delay             = 50;
+        int  loop_count             = 0;
 
     private:
         ui_message_t get_user_input(void);
         void game_loop(void);
-        void test_collision(void);
-        void character_update(void);
-        void display_text(void);
-        void display_graphics();
+        int  test_collision(void);
+        int  character_update(void);
+        int  display_text(void);
+        int  display_graphics();
 
     public:
         SimpleGame(world *p_world);

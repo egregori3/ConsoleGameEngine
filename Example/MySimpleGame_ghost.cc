@@ -54,18 +54,22 @@ std::string decode_motion(motion_t in)
 // update_message_from_engine
 const debug_message_t monster::update_monster(const surroundings_t &ws)
 {
-    debug_message_t msg = {std::string()};
-    std::string debug = "ID: " + std::to_string(id) + ", ";
+    debug_message_t msg = {.valid = false};
+    std::string debug;
+
+    char_write_old_pos = ws.c;
 
     // https://www.geeksforgeeks.org/set-find-function-in-c-stl/
     // https://www.cplusplus.com/reference/set/set/
     std::set<motion_t> available_motion_list;
 
+    DB6("Update Ghost: "<<iterations);
     if(iterations % 16)
     {
         return msg; // Only update the ghost's position once every 16 calls
     }
 
+    DB6("Update Ghost position");
     if(monster_test(ws.tc) == true)
     {
         available_motion_list.insert(UP);
@@ -126,22 +130,26 @@ const debug_message_t monster::update_monster(const surroundings_t &ws)
     debug += ", ";
     debug += std::to_string(old_col);
     debug += ", ";
-    debug += std::to_string(old_c);
+    debug += std::to_string(char_write_old_pos);
     debug += ")";
+
+    // Save current position
+    old_row = new_row;
+    old_col = new_col;
 
     switch(old_motion)
     {
         case UP:
-            new_row = old_row - 1;
+            new_row = new_row - 1;
             break;
         case DOWN:
-            new_row = old_row + 1;
+            new_row = new_row + 1;
             break;
         case LEFT:
-            new_col = old_col - 1;
+            new_col = new_col - 1;
             break;
         case RIGHT:
-            new_col = old_col + 1;
+            new_col = new_col + 1;
             break;
     }
 
@@ -150,17 +158,18 @@ const debug_message_t monster::update_monster(const surroundings_t &ws)
     debug += ", ";
     debug += std::to_string(new_col);
     debug += ", ";
-    debug += std::to_string(new_c);
+    debug += std::to_string(char_write_new_pos);
     debug += ")";
 
+    msg.valid = true;
     msg.debug_message = debug;
 
     return msg;
 }
 
 
-const debug_message_t monster::collision_monster(int id)
+const debug_message_t monster::collision_monster(int col_id)
 {
-    const debug_message_t msg = {std::string("collision: ")+std::to_string(id)};
+    debug_message_t msg = {.valid = false};
     return msg;
 }

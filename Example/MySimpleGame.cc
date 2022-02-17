@@ -88,6 +88,25 @@ const std::string arena =
     "|======================================|";// 20
 
 
+
+static char spinner(int loop_count)
+{
+    switch(loop_count % 4)
+    {
+        case 0:
+            return '|';
+        case 1:
+            return '/';
+        case 2:
+            return '-';
+        case 3:
+            return '\\';
+    }
+
+    return '*';
+}
+
+
 /******************************************************************************/
 /*                                                                            */
 /*                         eater_world public methods                         */
@@ -115,21 +134,22 @@ void eater_world::get_world(std::string &background, world_data_t &wd)
 
 const surroundings_t eater_world::get_surroundings(int lrow, int lcol)
 {
-    if((lrow < wrow_start) || (lrow >= (wrow_start+wrows)))
+    int row = lrow - wrow_start;
+    int col = lcol - wcol_start;
+
+    if((row<0) || (row >= wrows))
     {
         std::string msg = std::string(__FILE__) + ":" + std::to_string(__LINE__) + " "
-            + ROW_ERROR + "row: " + std::to_string(lrow);
+            + ROW_ERROR + "row: " + std::to_string(row);
         throw std::range_error(msg);
     }
-    if((lcol < wcol_start) || (lcol >= (wcol_start+wcols)))
+    if((col < 0) || (col >= wcols))
     {
         std::string msg = std::string(__FILE__) + ":" + std::to_string(__LINE__) + " "
-            + COL_ERROR + "col: " + std::to_string(lcol);
+            + COL_ERROR + "col: " + std::to_string(col);
         throw std::range_error(msg);
     }
 
-    int row = lrow - wrow_start;
-    int col = lcol - wcol_start;
 
     surroundings_t wm;
     // Fill out message
@@ -149,16 +169,27 @@ const surroundings_t eater_world::get_surroundings(int lrow, int lcol)
 }
 
 
-const int eater_world::update(int lrow, int lcol, int lc)
+void eater_world::update(int lrow, int lcol, int lc)
 {
     int row = lrow - wrow_start;
     int col = lcol - wcol_start;
-    const int c = (const int)arena_cpy[row*wcols+col];
 
+    if((row<0) || (row >= wrows))
+    {
+        std::string msg = std::string(__FILE__) + ":" + std::to_string(__LINE__) + " "
+            + ROW_ERROR + "row: " + std::to_string(row);
+        throw std::range_error(msg);
+    }
+    if((col < 0) || (col >= wcols))
+    {
+        std::string msg = std::string(__FILE__) + ":" + std::to_string(__LINE__) + " "
+            + COL_ERROR + "col: " + std::to_string(col);
+        throw std::range_error(msg);
+    }
+
+    DB5("eater world update ("<<row<<","<<col<<")");
     arena_cpy[row*wcols+col] = lc;
-
-    // return background character for old position
-    return c;
+    DB5("eater world update post write ("<<lc<<")");
 }
 
 
@@ -170,14 +201,22 @@ const int eater_world::update(int lrow, int lcol, int lc)
 
 monster::monster(int lid, int lrow, int lcol, int lc, bool ldisplay)
 {
-    id         = lid;
-    new_row    = lrow;
-    new_col    = lcol;
-    new_c      = lc;
-    old_row    = lrow;
-    old_col    = lcol;
-    old_c      = lc;
-    display    = ldisplay;
+    id                  = lid;
+    new_row             = lrow;
+    new_col             = lcol;
+    char_write_new_pos  = lc;
+    old_row             = lrow;
+    old_col             = lcol;
+    char_write_old_pos  = (int)' ';
+    display             = ldisplay;
+
+    iterations          = 0;
+    score               = 0;
+    delay_engine        = 0;
+    game_over           = false;
+    char_changed        = false;
+    eater_state         = EATING;
+    ghost_state         = CHASE;
 
     eng        = std::default_random_engine(rd());
     distr      = std::uniform_real_distribution<float>(0.0, 1.0);
@@ -187,14 +226,14 @@ monster::monster(int lid, int lrow, int lcol, int lc, bool ldisplay)
 
 const position_t monster::get_new_position(void)
 {
-    const position_t data = {.id=id, .row=new_row, .col=new_col, .c=new_c};
+    const position_t data = {.id=id, .row=new_row, .col=new_col};
     return data;
 }
 
 
 const position_t monster::get_old_position(void)
 {
-    const position_t data = {.id=id, .row=old_row, .col=old_col, .c=old_c};
+    const position_t data = {.id=id, .row=old_row, .col=old_col};
     return data;
 }
 
@@ -224,16 +263,19 @@ const graphic_data_t monster::get_graphics(void)
                                 .id          = id,
                                 .display     = display,
                                 .changed     = false,
-                                {.id = id, .row = old_row, .col = old_col, .c = old_c},
-                                {.id = id, .row = new_row, .col = new_col, .c = new_c},
+                                .char_write_new_pos = char_write_new_pos,
+                                .char_write_old_pos = char_write_old_pos,
+                                {.id = id, .row = old_row, .col = old_col},
+                                {.id = id, .row = new_row, .col = new_col},
                            };
+    DB5("get_graphics id:"<<id<<" display:"<<display<<" char_changed:"<<char_changed
+            <<" old: ("<<old_row<<","<<old_col<<")"
+            <<" new: ("<<new_row<<","<<new_col<<")");
 
-    if((old_row != new_row) || (old_col != new_col) || (old_c != new_c))
+    if((old_row != new_row) || (old_col != new_col) || char_changed)
     {
         data.changed = true;
-        old_row = new_row;
-        old_col = new_col;
-        old_c   = new_c;
+        char_changed = false;
     }
 
     return data;
@@ -243,12 +285,13 @@ const graphic_data_t monster::get_graphics(void)
 const text_window_t monster::get_text(void)
 {
     std::stringstream   message_string;
-    text_window_t       message_window;
+    text_window_t       message_window = {.valid=false};
 
     if(game_over)
     {
         message_string << "Game Over";
         message_window = {
+                            .valid     = true,
                             .row_start = wrows+wrow_start+1,
                             .col_start = 0,
                             .width     = 40,
@@ -263,6 +306,7 @@ const text_window_t monster::get_text(void)
         case 0:
             message_string << "Score: " << score;
             message_window = {
+                                .valid     = true,
                                 .row_start = 0,
                                 .col_start = 0,
                                 .width     = 40,
@@ -295,27 +339,43 @@ const debug_message_t monster::collision(int id)
 
 
 const debug_message_t monster::update(const ui_message_t &user_input,
-                                     const surroundings_t &surroundings)
+                                      const surroundings_t &surroundings)
 {
-    debug_message_t msg;
-
+    DB5("Monster Update");
+    debug_message_t ret_message;
+    std::string msg = "ID: "+std::to_string(id) + " (";
     if(id == EATER_ID)
     {
-        msg = update_eater(user_input, surroundings);
+        ret_message = update_eater(user_input, surroundings);
+        DB5("Eater Update: ");
+        if(ret_message.valid)
+            DB5("ret message: "<<ret_message.debug_message);
     }
     else
     {
-        msg = update_monster(surroundings);
+        ret_message = update_monster(surroundings);
+        DB5("Ghost Update: ");
+        if(ret_message.valid)
+            DB5("ret message: "<<ret_message.debug_message);
     }
 
     iterations++;
+    msg += std::to_string(iterations);
+    msg += ") = ";
 
-    return msg;
+    if(ret_message.valid)
+    {
+        ret_message.debug_message = msg + ret_message.debug_message;
+        DB5("msg: "<<ret_message.debug_message);
+    }
+
+    return ret_message;
 }
 
 
 const engine_loop_t monster::get_loop_delay(void)
 {
+    DB5("get loop delay");
     const engine_loop_t retval = {.delay=50, .game_over=false};
     return retval;
 }

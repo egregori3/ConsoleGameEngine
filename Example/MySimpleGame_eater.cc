@@ -36,7 +36,7 @@ bool monster::eater_test(const int input)
 // update_message_from_engine
 const debug_message_t monster::update_eater(const ui_message_t &user_input, const surroundings_t &ws)
 {
-    debug_message_t msg = {std::string()};
+    debug_message_t msg = {.valid=false};
 
     if(eater_state != EATING)
     {
@@ -45,58 +45,60 @@ const debug_message_t monster::update_eater(const ui_message_t &user_input, cons
             switch(eater_state)
             {
                 case DEAD1:
-                    new_c = '^';
+                    char_write_new_pos = '^';
                     eater_state = DEAD2;
                     break;
                 case DEAD2:
-                    new_c = '>';
+                    char_write_new_pos = '>';
                     eater_state = DEAD3;
                     break;
                 case DEAD3:
-                    new_c = 'v';
+                    char_write_new_pos = 'v';
                     eater_state = DEAD4;
                     break;
                 case DEAD4:
-                    new_c = '<';
+                    char_write_new_pos = '<';
                     eater_state = EATING;
                     game_over = true;
                     break;
                 default:
                     eater_state = EATING;
             }
+            char_write_old_pos = char_write_new_pos;
+            char_changed = true;
+            
         }
 
         return msg;
     }
 
-//    oss << "test: " << my_state.row << ","
-//                    << my_state.col << ","
-//                    << ws.tc << "," 
-//                    << ws.bc << "," 
-//                    << ws.cl << "," 
-//                    << ws.cr;
+    // Save current position
+    old_row = new_row;
+    old_col = new_col;
+
+    if(ws.c == '*') char_write_old_pos = ' ';
     if((user_input == UI_UP) && (eater_test(ws.tc)))
     {
-        new_row = old_row - 1;
-        new_c = 'v';
+        new_row = new_row - 1;
+        char_write_new_pos = 'v';
     }
 
     if((user_input == UI_DOWN) && (eater_test(ws.bc)))
     {
-        new_row = old_row + 1;
-        new_c = '^';
+        new_row = new_row + 1;
+        char_write_new_pos = '^';
     }
 
     if((user_input == UI_LEFT) && (eater_test(ws.cl)))
     {
-        new_col = old_col - 1;
-        new_c = '>';
+        new_col = new_col - 1;
+        char_write_new_pos = '>';
     }
 
     if((user_input == UI_RIGHT) && (eater_test(ws.cr)))
     {
-        new_col = old_col + 1;
-        new_c = '<';
+        new_col = new_col + 1;
+        char_write_new_pos = '<';
     }
 
     return msg;
@@ -105,11 +107,12 @@ const debug_message_t monster::update_eater(const ui_message_t &user_input, cons
 
 const debug_message_t monster::collision_eater(int col_id)
 {
-    debug_message_t msg = {std::string()};
-    msg.debug_message += "collision: " + std::to_string(id) + ", " + std::to_string(col_id);
+    debug_message_t msg = {.valid = true};
+    std::string info = std::string("collision: ") + std::to_string(id) + ", " + std::to_string(col_id);
     if(eater_state == EATING)
         eater_state = DEAD1;
     delay_engine = 1;
+    msg.debug_message = info;
     return msg;
 }
 

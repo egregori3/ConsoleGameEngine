@@ -27,6 +27,9 @@
 #include "graphics.h"
 
 
+int max_x = 110;
+int max_y = 80;
+
 graphics::graphics(int rows, int cols)
 {
     std::cout << "LinuxText graphics init" << " Rows: " << rows << " Cols: " << cols << std::endl;
@@ -39,6 +42,7 @@ graphics::graphics(int rows, int cols)
     keypad(stdscr, TRUE);   /* I need that nifty F1 */
 //    my_win = newwin(rows, cols, 0, 0);
     curs_set(0);
+//    getmaxyx(stdscr, max_y, max_x);
 #endif
     width  = cols;
     height = rows;
@@ -54,6 +58,8 @@ graphics::~graphics()
 
 int graphics::write( int row_start, int col_start, std::string bg, int cols)
 {
+    if(row_start > max_y) return -1;
+    if((col_start+cols) > max_x) return -1;
 #ifndef DISABLE_GRAPHICS
     int row = row_start;
     int col = col_start;
@@ -72,6 +78,8 @@ int graphics::write( int row_start, int col_start, std::string bg, int cols)
 
 int graphics::write(int row_start, int col_start, std::string bg)
 {
+    if(row_start > max_y) return -1;
+    if(col_start > max_x) return -1;
 #ifndef DISABLE_GRAPHICS
     write(row_start, col_start, bg, width);
     refresh();
@@ -83,13 +91,15 @@ int graphics::write(int row_start, int col_start, std::string bg)
 
 int graphics::write(int row, int col, int width, int height, std::string info)
 {
+    if(row > max_y) return -1;
+    if(col > max_x) return -1;
 #ifndef DISABLE_GRAPHICS
     std::string msg = std::string(info,0,width);
     int str_len = msg.length();
     mvaddstr(row, col, msg.c_str());
     mvaddstr(row, col+str_len, std::string(width-str_len,' ').c_str());
 #else
-    std::cout << "(" << row << "," << col << "," << width << "," << height << ")";
+    std::cout << "graphic::write(string)(" << row << "," << col << "," << width << "," << height << ")";
     std::cout << "  info: "<< info << std::endl;
 #endif
     previous_debug_width = info.length();
@@ -99,10 +109,13 @@ int graphics::write(int row, int col, int width, int height, std::string info)
 
 int graphics::write(int row, int col, int c)
 {
+    if(row > max_y) return -1;
+    if(col > max_x) return -1;
+    if(c < 32)      return -1;
 #ifndef DISABLE_GRAPHICS
     mvaddch(row, col, (char)c);
 #else
-    std::cout << "graphics::write(" << row << " , " << col << " = " << c << std::endl;
+    std::cout << "graphics::write(char)(" << row << "," << col << ") = " << c << std::endl;
 #endif
     return 0;
 }
