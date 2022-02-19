@@ -57,8 +57,6 @@ const debug_message_t monster::update_monster(const surroundings_t &ws)
     debug_message_t msg = {.valid = false};
     std::string debug;
 
-    char_write_old_pos = ws.c;
-
     // https://www.geeksforgeeks.org/set-find-function-in-c-stl/
     // https://www.cplusplus.com/reference/set/set/
     std::set<motion_t> available_motion_list;
@@ -132,10 +130,6 @@ const debug_message_t monster::update_monster(const surroundings_t &ws)
     debug += ", ";
     debug += std::to_string(char_write_old_pos);
     debug += ")";
-
-    // Save current position
-    old_row = new_row;
-    old_col = new_col;
 
     switch(old_motion)
     {

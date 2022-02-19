@@ -102,8 +102,8 @@ class eater_world : public world
         eater_world();
 
         void  get_world(std::string &background, world_data_t &world_data);
-        const surroundings_t get_surroundings(int row, int col);
-        void                 update(int row, int col, int c);
+        const surroundings_t get_surroundings(graphic_data_t data);
+        void                 update(graphic_data_t data);
 };
 
 /**
@@ -124,8 +124,8 @@ class monster : public character
         int             char_write_current_pos;
         int             char_write_next_pos;
         bool            display;   // set to true to display the character
-        position_t      current;
-        position_t      next;
+        position_t      posa;
+        position_t      posb;
         motion_t        old_motion;
 
         int             iterations;
@@ -154,8 +154,6 @@ class monster : public character
     public:
         monster(int id, int row, int col, int c, bool display);
 
-        const position_t      get_current_position(void);
-        const position_t      get_next_position(void);
         const graphic_data_t  get_graphics(void);
         const text_window_t   get_text(void);
         const engine_loop_t   get_loop_delay(void);

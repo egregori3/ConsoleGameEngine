@@ -199,6 +199,7 @@ typedef struct
     int  id;        // id of character - the user can use for whatever they want
     int  row;       // row position of character
     int  col;       // col position of character
+    int  char_to_write;
 }   position_t;
 
 
@@ -207,10 +208,8 @@ typedef struct
     int         id;        // id of character - the user can use for whatever they want
     bool        display;   // set to true to display the character
     bool        changed;
-    int         char_write_new_pos;
-    int         char_write_old_pos;
-    position_t  old_pos;
-    position_t  new_pos;
+    position_t  posa;
+    position_t  posb;
 }   graphic_data_t;
 
 
@@ -273,8 +272,6 @@ class character
 {
     public: // 
         // pure virtual function (ZC8.4)
-        virtual const position_t      get_old_position(void) = 0;
-        virtual const position_t      get_new_position(void) = 0;
         virtual const graphic_data_t  get_graphics(void)     = 0;
         virtual const text_window_t   get_text(void)         = 0;
         virtual const engine_loop_t   get_loop_delay(void)   = 0;
@@ -319,8 +316,8 @@ class world
         // pure virtual function (ZC8.4)
         virtual void                 get_world(std::string &background,
                                                world_data_t &world_data) = 0;
-        virtual const surroundings_t get_surroundings(int row, int col)  = 0;
-        virtual void                 update(int row, int col, int c)     = 0;
+        virtual const surroundings_t get_surroundings(graphic_data_t data)  = 0;
+        virtual void                 update(graphic_data_t data)         = 0;
 };
 
 #endif

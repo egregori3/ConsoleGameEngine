@@ -275,7 +275,6 @@ const graphic_data_t monster::get_graphics(void)
     if((old_row != new_row) || (old_col != new_col) || char_changed)
     {
         data.changed = true;
-        char_changed = false;
     }
 
     return data;
@@ -344,6 +343,11 @@ const debug_message_t monster::update(const ui_message_t &user_input,
     DB5("Monster Update");
     debug_message_t ret_message;
     std::string msg = "ID: "+std::to_string(id) + " (";
+    char_changed = false;
+    char_write_old_pos = surroundings.c;
+    // Save current position
+    old_row = new_row;
+    old_col = new_col;
     if(id == EATER_ID)
     {
         ret_message = update_eater(user_input, surroundings);

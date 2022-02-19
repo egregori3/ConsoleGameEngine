@@ -64,17 +64,12 @@ const debug_message_t monster::update_eater(const ui_message_t &user_input, cons
                 default:
                     eater_state = EATING;
             }
-            char_write_old_pos = char_write_new_pos;
             char_changed = true;
             
         }
 
         return msg;
     }
-
-    // Save current position
-    old_row = new_row;
-    old_col = new_col;
 
     if(ws.c == '*') char_write_old_pos = ' ';
     if((user_input == UI_UP) && (eater_test(ws.tc)))
